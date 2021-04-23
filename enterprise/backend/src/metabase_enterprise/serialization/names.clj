@@ -229,7 +229,8 @@
                          fully-qualified-name)
                     {:fully-qualified-name fully-qualified-name
                      :resolve-name-failed? true
-                     :context              context})))))))
+                     :context              context}
+                    e)))))))
 
 (defn name-for-logging
   "Return a string representation of entity suitable for logs"

@@ -408,7 +408,7 @@
   (try
     (-> (fully-qualified-name->context fully-qualified-name) :card)
     (catch Throwable e
-      (log/warn e))))
+      (log/warn e (trs "Could not find context for fully qualified card name {0}" fully-qualified-name)))))
 
 (defn- resolve-native
   [card]
