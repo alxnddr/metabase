@@ -93,6 +93,10 @@
       (update res ::unresolved-names #(assoc % orig-v ks))
       res)))
 
+(defn- update-in-capture-missing
+  [m ks resolve-fn]
+  (update-capture-missing* m ks resolve-fn get-in update-in))
+
 (defn- update-existing-in-capture-missing
   [m ks resolve-fn]
   (update-capture-missing* m ks resolve-fn get-in m/update-existing-in))
@@ -395,7 +399,7 @@
 
 (defn- fully-qualified-name->id-rec [query]
   (cond
-    (:source-table query) (update-in query [:source-table] source-table)
+    (:source-table query) (update-in-capture-missing query [:source-table] source-table)
     (:source-query query) (update-in query [:source-query] fully-qualified-name->id-rec)
     :default query))
 
@@ -418,6 +422,11 @@
                            template-tags)]
     (pull-unresolved-names-up card ks new-template-tags)))
 
+(defn- resolve-card-dataset-query [card]
+  (let [ks    [:dataset_query :query]
+        new-q (update-in-capture-missing card ks fully-qualified-name->id-rec)]
+    (pull-unresolved-names-up card ks (get-in new-q ks))))
+
 (defn- resolve-card [card context]
   (-> card
       (update :table_id (comp :table fully-qualified-name->context))
@@ -432,7 +441,7 @@
               :dataset_query
               :type
               mbql.util/normalize-token
-              (= :query)) (update-in [:dataset_query :query] fully-qualified-name->id-rec)
+              (= :query)) resolve-card-dataset-query
           (-> card
               :dataset_query
               :native
@@ -475,10 +484,6 @@
      (for [card (slurp-many paths)] (resolve-card card (assoc context :mode :update)))
      touched-card-ids)
 
-    ;; Nested cards
-    (doseq [path paths]
-      (load (str path "/cards") context))
-
     (if dummy-insert-cards
       (let [dummy-inserted-ids (maybe-upsert-many!
                                 context
@@ -490,7 +495,7 @@
         (log/infof
          "Unresolved references found for cards in collection %d; will reload after first pass%n%s%n"
          (:collection context)
-         (str/join "%n" (map retry-info-fn id-and-cards)))
+         (str/join "\n" (map retry-info-fn id-and-cards)))
         (fn []
           (log/infof "Attempting to reload cards in collection %d" (:collection context))
           (let [revisit-indexes (::revisit-index grouped-cards)]

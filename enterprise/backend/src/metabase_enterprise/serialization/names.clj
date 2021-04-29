@@ -97,10 +97,6 @@
   [card]
   (format "%s/cards/%s"
           (or (some->> card
-                       :dataset_query
-                       qp.util/query->source-card-id
-                       (fully-qualified-name Card))
-              (some->> card
                        :collection_id
                        (fully-qualified-name Collection))
               "/collections/root")
