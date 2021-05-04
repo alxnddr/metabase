@@ -170,7 +170,8 @@
                                                               card-id-nested-query
                                                               card-id-native-query
                                                               card-id-root-to-collection
-                                                              card-id-collection-to-root])
+                                                              card-id-collection-to-root
+                                                              card-id-template-tags])
                          :collections   (gather-collections [card-id
                                                              card-arch-id
                                                              card-id-root
@@ -178,7 +179,8 @@
                                                              card-id-nested-query
                                                              card-id-native-query
                                                              card-id-root-to-collection
-                                                             card-id-collection-to-root])
+                                                             card-id-collection-to-root
+                                                             card-id-template-tags])
                          :entities      [[Database      (Database db-id)]
                                          [Table         (Table table-id)]
                                          [Field         (Field numeric-field-id)]
@@ -186,6 +188,7 @@
                                          [Field         (Field category-field-id)]
                                          [Field         (Field latitude-field-id)]
                                          [Field         (Field longitude-field-id)]
+                                         [Field         (Field category-pk-field-id)]
                                          [Collection    (Collection collection-id)]
                                          [Collection    (Collection collection-id-nested)]
                                          [Metric        (Metric metric-id)]
@@ -201,7 +204,8 @@
                                          [DashboardCard (DashboardCard dashcard-id)]
                                          [DashboardCard (DashboardCard dashcard-with-click-actions)]
                                          [Card          (Card card-id-root-to-collection)]
-                                         [Card          (Card card-id-collection-to-root)]]})]
+                                         [Card          (Card card-id-collection-to-root)]
+                                         [Card          (Card card-id-template-tags)]]})]
       (with-world-cleanup
         (load dump-dir {:on-error :continue :mode :update})
         (doseq [[model entity] (:entities fingerprint)]
