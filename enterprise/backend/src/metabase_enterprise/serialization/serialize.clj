@@ -146,8 +146,8 @@
 
 (defn- convert-viz-settings [viz-settings]
   (-> (mb.viz/from-db-form viz-settings)
-      (update ::mb.viz/column-settings (fn [col-settings]
-                                         (reduce-kv convert-column-settings {} col-settings)))
+      (m/update-existing ::mb.viz/column-settings (fn [col-settings]
+                                                    (reduce-kv convert-column-settings {} col-settings)))
       mb.viz/db-form))
 
 (defn- dashboard-cards-for-dashboard

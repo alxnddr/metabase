@@ -202,18 +202,22 @@
                                                   (set/rename-keys db->norm-click-behavior-keys)))
     (assoc m (db->norm-column-settings-keys k) v)))
 
+(defn- column-settings-db->normalized [visualization-settings]
+  (let [new-col-settings (->> (:column_settings visualization-settings)
+                              (m/map-kv (fn [k v]
+                                          (let [k1 (parse-column-ref k)
+                                                v1 (reduce-kv db-form-entry-to-normalized {} v)]
+                                            [k1 v1]))))]
+    (-> (assoc visualization-settings ::column-settings new-col-settings)
+        (dissoc :column_settings))))
+
 (defn from-db-form
   "Converts a DB form of visualization settings (i.e. map with key `:visualization_settings`) into the equivalent
   normalized form (i.e. map with key `::visualization-settings`."
   {:added "0.40.0"}
   [visualization_settings]
-  (if-let [col-settings (:column_settings visualization_settings)]
-    {::column-settings (->> col-settings
-                            (m/map-kv (fn [k v]
-                                        (let [k1 (parse-column-ref k)
-                                              v1 (reduce-kv db-form-entry-to-normalized {} v)]
-                                          [k1 v1]))))}
-    {}))
+  (cond-> visualization_settings
+    (:column_settings visualization_settings) column-settings-db->normalized))
 
 (defn- normalized-entry-to-db-form
   "Converts a ::column-settings entry from qualified form to DB form. Does the opposite of
@@ -252,8 +256,7 @@
   `::visualization-settings` into the equivalent DB form (i.e. a map having `:visualization_settings`)."
   {:added "0.40.0"}
   [settings]
-  (if-let [col-settings (::column-settings settings)]
-    (if (empty? col-settings)
-      {}
-      {:column_settings (db-form-column-settings col-settings)})
-    {}))
+  (cond-> settings
+    (::column-settings settings) (->
+                                    (assoc :column_settings (db-form-column-settings (::column-settings settings)))
+                                    (dissoc ::column-settings))))

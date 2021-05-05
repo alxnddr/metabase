@@ -123,33 +123,39 @@
                                 0 "My Card"
                                 1 "My Nested Card"
                                 2 ts/root-card-name)]
-            (is (= expected-name (db/select-one-field :name Card :id (:card_id series))))
-            (if (= 2 series-pos)
-              (testing "Click action was preserved for dashboard card"
-                (let [viz-settings   (:visualization_settings dashcard)
-                      check-click-fn (fn [[col-key col-value]]
-                                       (let [col-ref   (mb.viz/parse-column-ref col-key)
-                                             {:keys [::mb.viz/field-id ::mb.viz/column-name]} col-ref
-                                             click-bhv (get col-value :click_behavior)
-                                             target-id (get click-bhv :targetId)]
-                                         (cond
-                                           field-id (let [field-nm (id->name Field field-id)]
-                                                      (case field-nm
-                                                        "PRICE"    (is (= "My Card" (id->name Card target-id)))
-                                                        "NAME"     (is (=
-                                                                        "Root Dashboard"
-                                                                        (id->name Dashboard target-id)))
-                                                        "LATITUDE" (is (= {:linkType         nil
-                                                                           :parameterMapping {}
-                                                                           :type             "crossfilter"}
-                                                                          click-bhv))))
-                                           column-name
-                                           (case column-name
-                                             "Price Known" (is (= {:type         "link"
-                                                                   :linkType     "url"
-                                                                   :linkTemplate "/price-info"} click-bhv))))))]
-                  (is (not-empty viz-settings))
-                  (doall (map check-click-fn (:column_settings viz-settings)))))))))))
+            (when (some? expected-name)
+              (is (= expected-name (db/select-one-field :name Card :id (:card_id series)))))
+            (case series-pos
+              2 (testing "Click action was preserved for dashboard card"
+                  (let [viz-settings   (:visualization_settings dashcard)
+                        check-click-fn (fn [[col-key col-value]]
+                                         (let [col-ref   (mb.viz/parse-column-ref col-key)
+                                               {:keys [::mb.viz/field-id ::mb.viz/column-name]} col-ref
+                                               click-bhv (get col-value :click_behavior)
+                                               target-id (get click-bhv :targetId)]
+                                           (cond
+                                             field-id (let [field-nm (id->name Field field-id)]
+                                                        (case field-nm
+                                                          "PRICE"    (is (= "My Card" (id->name Card target-id)))
+                                                          "NAME"     (is (=
+                                                                          "Root Dashboard"
+                                                                          (id->name Dashboard target-id)))
+                                                          "LATITUDE" (is (= {:linkType         nil
+                                                                             :parameterMapping {}
+                                                                             :type             "crossfilter"}
+                                                                            click-bhv))))
+                                             column-name
+                                             (case column-name
+                                               "Price Known" (is (= {:type         "link"
+                                                                     :linkType     "url"
+                                                                     :linkTemplate "/price-info"} click-bhv))))))]
+                    (is (not-empty viz-settings))
+                    (doall (map check-click-fn (:column_settings viz-settings)))))
+              ;; for other series positions, nothing in particular to check
+              true)))
+        (when-let [virt-card (get-in dashcard [:visualization_settings :virtual_card])]
+          (is (= ts/virtual-card virt-card))
+          (is (= "Textbox Card" (get-in dashcard [:visualization_settings :text])))))))
   dashboard)
 
 (defmethod assert-loaded-entity :default
@@ -205,7 +211,8 @@
                                          [DashboardCard (DashboardCard dashcard-with-click-actions)]
                                          [Card          (Card card-id-root-to-collection)]
                                          [Card          (Card card-id-collection-to-root)]
-                                         [Card          (Card card-id-template-tags)]]})]
+                                         [Card          (Card card-id-template-tags)]
+                                         [DashboardCard (DashboardCard dashcard-with-textbox-id)]]})]
       (with-world-cleanup
         (load dump-dir {:on-error :continue :mode :update})
         (doseq [[model entity] (:entities fingerprint)]
@@ -222,4 +229,4 @@
                 (str " failed " (pr-str entity)))))
         fingerprint))
     (finally
-      (delete-directory! dump-dir))))
+      #_(delete-directory! dump-dir))))
