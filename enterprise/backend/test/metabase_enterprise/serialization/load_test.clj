@@ -110,6 +110,25 @@
 (defn- id->name [model id]
   (db/select-one-field :name model :id id))
 
+(defn- assert-price-click [click target-id]
+  ;; first, it should be pointing to "My Card"
+  (is (= "My Card" (id->name Card target-id)))
+  (let [param-mapping (:parameterMapping click)]
+    ;; also, the parameter mappings should have been preserved
+    (is (not-empty param-mapping))
+    (let [mapping-key     (-> param-mapping
+                              keys
+                              first)
+          mapping-keyname (mb.viz/keyname mapping-key)
+          [_ f1-id f2-id] (re-matches #".*\[\"field(?:-id)?\",(\d+),.*\[\"field(?:-id)?\",(\d+),.*" mapping-keyname)
+          f1              (db/select-one Field :id (Integer/parseInt f1-id))
+          f2              (db/select-one Field :id (Integer/parseInt f2-id))
+          dimension       (get-in param-mapping [mapping-key :target :dimension])]
+      ;; the source and target fields should be CATEGORY_ID and PRICE, respectively
+      (is (= "CATEGORY_ID" (:name f1)))
+      (is (= "PRICE" (:name f2)))
+      (is (= {:dimension [:field (u/the-id f2) {:source-field (u/the-id f1)}]} dimension)))))
+
 (defmethod assert-loaded-entity (type Dashboard)
   [dashboard _]
   (testing "The dashboard card series were loaded correctly"
@@ -136,12 +155,11 @@
                                            (cond
                                              field-id (let [field-nm (id->name Field field-id)]
                                                         (case field-nm
-                                                          "PRICE"    (is (= "My Card" (id->name Card target-id)))
+                                                          "PRICE"    (assert-price-click click-bhv target-id)
                                                           "NAME"     (is (=
                                                                           "Root Dashboard"
                                                                           (id->name Dashboard target-id)))
                                                           "LATITUDE" (is (= {:linkType         nil
-                                                                             :parameterMapping {}
                                                                              :type             "crossfilter"}
                                                                             click-bhv))))
                                              column-name

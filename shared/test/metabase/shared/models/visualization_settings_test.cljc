@@ -29,10 +29,10 @@
           db-col-settings     {(fmt "[\"ref\",[\"field\",%d,null]]" f-id) {:click_behavior db-click-behavior}
                                (fmt "[\"name\",\"%s\"]" col-name)         {:click_behavior db-click-behavior}}
           db-viz-settings     {:column_settings db-col-settings}
-          norm-click-behavior {::mb.viz/click-behavior-type    ::mb.viz/link
-                               ::mb.viz/link-type              ::mb.viz/card
-                               ::mb.viz/link-parameter-mapping {}
-                               ::mb.viz/link-target-id         target-id}
+          norm-click-behavior {::mb.viz/click-behavior-type ::mb.viz/link
+                               ::mb.viz/link-type           ::mb.viz/card
+                               ::mb.viz/parameter-mapping   {}
+                               ::mb.viz/link-target-id      target-id}
           norm-click-bhvr-map {::mb.viz/click-behavior norm-click-behavior}
           norm-col-settings   {(mb.viz/column-ref-for-id f-id) norm-click-bhvr-map
                                (mb.viz/column-ref-for-column-name col-name) norm-click-bhvr-map}
@@ -61,3 +61,42 @@
       (t/is (= db-form (-> db-form
                            mb.viz/from-db-form
                            mb.viz/db-form))))))
+
+(t/deftest parameter-mapping-test
+  (t/testing "parameterMappings are handled correctly"
+    (let [from-id    101
+          to-id      294
+          card-id    19852
+          mapping-id (format "[\"dimension\",[\"fk->\",[\"field-id\",%d],[\"field-id\",%d]]]" from-id to-id)
+          norm-id    [:dimension [:fk-> [:field-id from-id] [:field-id to-id]]]
+          col-key    "[\"name\",\"Some Column\"]"
+          norm-key   {::mb.viz/column-name "Some Column"}
+          dimension  [:dimension [:field to-id {:source-field from-id}]]
+          param-map  {mapping-id {:id     mapping-id
+                                  :source {:type "column"
+                                           :id   "Category_ID"
+                                           :name "Category ID"}
+                                  :target {:type      "dimension"
+                                           :id        mapping-id
+                                           :dimension dimension}}}
+          vs-db      {:column_settings {col-key {:click_behavior {:linkType         "question"
+                                                                  :type             "link"
+                                                                  :linkTextTemplate "Link Text Template"
+                                                                  :targetId         card-id
+                                                                  :parameterMapping param-map}}}}
+          norm-pm    {norm-id #::mb.viz{:param-mapping-id     norm-id
+                                        :param-mapping-source #::mb.viz{:param-ref-id "Category_ID"
+                                                                        :param-ref-type "column"
+                                                                        :param-ref-name "Category ID"}
+                                        :param-mapping-target #::mb.viz{:param-ref-id norm-id
+                                                                        :param-ref-type "dimension"
+                                                                        :param-dimension dimension}}}
+          exp-norm   {::mb.viz/column-settings {norm-key {::mb.viz/click-behavior
+                                                          #::mb.viz{:click-behavior-type ::mb.viz/link
+                                                                    :link-type           ::mb.viz/card
+                                                                    :link-text-template  "Link Text Template"
+                                                                    :link-target-id      card-id
+                                                                    :parameter-mapping   norm-pm}}}}
+          vs-norm     (mb.viz/from-db-form vs-db)]
+      (t/is (= exp-norm vs-norm))
+      (t/is (= vs-db (mb.viz/db-form vs-norm))))))
