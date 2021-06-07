@@ -207,6 +207,7 @@
     "test-cypress-smoketest": "yarn test-cypress-no-build --folder frontend/test/metabase-smoketest",
     "prepare": "husky install",
     "test-visual": "percy exec -- yarn build && ./bin/build-for-test && yarn test-cypress-no-build --folder frontend/test/metabase-visual",
+    "test-visual-no-build": "yarn test-cypress-no-build --folder frontend/test/metabase-visual",
     "test-visual-open": "percy exec -- yarn test-cypress-open --folder frontend/test/metabase-visual"
   },
   "lint-staged": {
