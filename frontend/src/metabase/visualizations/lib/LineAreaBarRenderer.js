@@ -442,7 +442,7 @@ function doScatterChartStuff(chart, datas, index, { yExtent, yExtents }) {
   if (chart.radiusValueAccessor) {
     const isBubble = datas[index][0].length > 2;
     if (isBubble) {
-      const BUBBLE_SCALE_FACTOR_MAX = 64;
+      const BUBBLE_SCALE_FACTOR_MAX = 2;
       chart
         .radiusValueAccessor(d => d.value)
         .r(
@@ -453,7 +453,7 @@ function doScatterChartStuff(chart, datas, index, { yExtent, yExtents }) {
         );
     } else {
       chart.radiusValueAccessor(d => 1);
-      chart.MIN_RADIUS = 3;
+      chart.MIN_RADIUS = 30;
     }
     chart.minRadiusWithLabel(Infinity);
   }
