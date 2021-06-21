@@ -92,6 +92,8 @@
     "@babel/standalone": "^7.4.5",
     "@cypress/skip-test": "^2.6.0",
     "@cypress/webpack-preprocessor": "^4.1.0",
+    "@percy/cli": "^1.0.0-beta.48",
+    "@percy/cypress": "^2.3.4",
     "@slack/client": "^3.5.4",
     "@testing-library/cypress": "^5.0.2",
     "@testing-library/dom": "^7.29.0",
@@ -203,7 +205,10 @@
     "test-cypress-open-no-backend": "E2E_HOST='http://localhost:3000' yarn test-cypress-no-build --open",
     "test-cypress-no-build": "yarn && CONFIG_FILE=frontend/test/__support__/e2e/cypress.json babel-node ./frontend/test/__runner__/run_cypress_tests.js",
     "test-cypress-smoketest": "yarn test-cypress-no-build --folder frontend/test/metabase-smoketest",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "test-visual": "percy exec -- yarn build && ./bin/build-for-test && yarn test-cypress-no-build --folder frontend/test/metabase-visual",
+    "test-visual-no-build": "yarn test-cypress-no-build --folder frontend/test/metabase-visual",
+    "test-visual-open": "percy exec -- yarn test-cypress-open --folder frontend/test/metabase-visual"
   },
   "lint-staged": {
     "frontend/**/*.{js,jsx,css}": [
