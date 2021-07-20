@@ -1,17 +1,4 @@
-name: VisualTests
-
-
-on:
-  push:
-    branches:
-      - master
-      - "release-**"
-    tags:
-      - "**"
-    paths-ignore:
-      - "docs/**"
-      - "frontend/test/**"
-      - "enterprise/frontend/test/**"
+name: Percy
 
 on:
   pull_request:
