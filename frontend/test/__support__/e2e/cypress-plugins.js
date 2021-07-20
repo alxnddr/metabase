@@ -22,6 +22,7 @@ const isQaDatabase = process.env["QA_DB_ENABLED"];
 // This function is called when a project is opened or re-opened (e.g. due to
 // the project's config changing)
 const webpack = require("@cypress/webpack-preprocessor");
+const percyHealthCheck = require("@percy/cypress/task");
 const { resolve } = require("../../../../webpack.config.js");
 
 const webpackPluginOptions = {
@@ -33,6 +34,8 @@ module.exports = (on, config) => {
   // `on` is used to hook into various events Cypress emits
   // `config` is the resolved Cypress config
 
+  // Required for Percy
+  on("task", percyHealthCheck);
   /********************************************************************
    **                          WEBPACK                               **
    ********************************************************************/
