@@ -1,4 +1,5 @@
-name: Percy
+# Triggers Percy job by "@metabase-bot run visual tests" comment in a PR
+name: PercyIssueComment
 
 on:
   issue_comment:
@@ -16,6 +17,9 @@ jobs:
       INTERACTIVE: false
     steps:
       - uses: actions/checkout@v2
+        with:
+          ref: ${{ fromJson(steps.fetch_pr.outputs.data).head.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Prepare Node.js
         uses: actions/setup-node@v1
         with:
@@ -90,6 +94,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/checkout@v2
+        with:
+          ref: ${{ fromJson(steps.fetch_pr.outputs.data).head.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Prepare Node.js
         uses: actions/setup-node@v1
         with:
