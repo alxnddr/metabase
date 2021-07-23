@@ -1,16 +1,8 @@
 name: Percy
 
 on:
-  push:
-    branches:
-      - master
-      - "release-**"
-    paths-ignore:
-      - "docs/**"
-      - "**.md"
-      - "**unit.spec.js"
-      - "frontend/test/**"
-      - "!frontend/test/metabase-visual/**"
+  issue_comment:
+    types: [created]
 
 jobs:
   build:
@@ -77,6 +69,21 @@ jobs:
     timeout-minutes: 30
     needs: build
     steps:
+      - name: Fetch issue
+        uses: octokit/request-action@v2.x
+        id: fetch_issue
+        with:
+          route: GET ${{ github.event.issue.url }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Fetch PR
+        uses: octokit/request-action@v2.x
+        id: fetch_pr
+        with:
+          route: GET ${{ fromJson(steps.fetch_issue.outputs.data).pull_request.url }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - uses: actions/checkout@v2
       - name: Prepare Node.js
         uses: actions/setup-node@v1
@@ -115,3 +122,6 @@ jobs:
           command: "yarn run test-visual-no-build"
         env:
           PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
+          PERCY_COMMIT: ${{ fromJson(steps.fetch_pr.outputs.data).head.sha }}
+          PERCY_BRANCH: ${{ fromJson(steps.fetch_pr.outputs.data).head.ref }}
+          PERCY_PULL_REQUEST: ${{ fromJson(steps.fetch_pr.outputs.data).head.number }}
