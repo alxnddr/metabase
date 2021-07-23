@@ -65,9 +65,14 @@ jobs:
             ./SHA256.sum
 
   percy:
-    runs-on: ubuntu-20.04
+    if: github.event.comment.body == '@metabase-bot run visual tests'
     timeout-minutes: 30
     needs: build
+    runs-on: ubuntu-20.04
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     steps:
       - name: Fetch issue
         uses: octokit/request-action@v2.x
