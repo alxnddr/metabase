@@ -67,7 +67,7 @@ jobs:
       - name: Create PR to branch
         uses: gorillio/github-action-cherry-pick@master
         with:
-          pr_branch: ${{ needs.get_latest_release_branch.outputs }}
+          pr_branch: ${{ needs.get_latest_release_branch.outputs.result }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITBOT_EMAIL: alxnddr@gmail.com
