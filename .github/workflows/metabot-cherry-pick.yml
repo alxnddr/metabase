@@ -48,6 +48,7 @@ jobs:
               ref: "heads/release-x.",
             });
 
+            console.log(releaseBranches, "releaseBranches")
             const getVersionFromBranch = branch => parseInt(branch.match(/release-x\.(.*?)\.x/)[1]);
             const latestReleaseBranch = releaseBranches.reduce((prev, current) => getVersionFromBranch(prev.ref) > getVersionFromBranch(current.ref) ? prev : current);
 
