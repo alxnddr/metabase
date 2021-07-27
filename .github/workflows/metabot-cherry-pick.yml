@@ -80,7 +80,9 @@ jobs:
 
           git fetch --all
           git checkout -b "${PR_BRANCH}" origin/"${RELEASE_BRANCH}"
+          git log --oneline -n 5
           git cherry-pick "${GITHUB_SHA}"
+          git log --oneline -n 5
           git push -u origin "${PR_BRANCH}"
 
           PR_TITLE=$(git log -1 --format="%s" $GITHUB_SHA)
