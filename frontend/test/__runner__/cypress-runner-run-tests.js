@@ -26,7 +26,7 @@ const parseArguments = async () => {
     cliArgs.unshift("cypress");
   }
 
-  if (cliArgs[1] !== "run") {
+  if (cliArgs[1] !== "run_") {
     cliArgs.splice(1, 0, "run");
   }
 
