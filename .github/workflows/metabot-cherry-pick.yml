@@ -2,7 +2,7 @@ name: MetabotCherryPick
 
 on:
   push:
-    branhes:
+    branches:
       - master
 
 jobs:
@@ -70,6 +70,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          ref: master
       - name: Create PR to branch
         uses: gorillio/github-action-cherry-pick@1.2
         with:
