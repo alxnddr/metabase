@@ -1,38 +1,63 @@
 name: MetabotCherryPick
 
 on:
-  issue_comment:
-    types: [created]
+  push:
+    branhes:
+      - master
 
 jobs:
-  # pr_info:
-  #   runs-on: ubuntu-20.04
-  #   outputs:
-  #     pull_request_number: ${{ fromJson(steps.fetch_pr.outputs.data).head.number }}
-  #     branch_name: ${{ fromJson(steps.fetch_pr.outputs.data).head.ref }}
-  #     commit_sha: ${{ fromJson(steps.fetch_pr.outputs.data).head.sha }}
-  #   steps:
-  #     - name: Fetch issue
-  #       uses: octokit/request-action@v2.x
-  #       id: fetch_issue
-  #       with:
-  #         route: GET ${{ github.event.issue.url }}
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #     - name: Fetch PR
-  #       uses: octokit/request-action@v2.x
-  #       id: fetch_pr
-  #       with:
-  #         route: GET ${{ fromJson(steps.fetch_issue.outputs.data).pull_request.url }}
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  get_target_branch:
-    if: contains(github.event.comment.body, '@metabase-bot cherry-pick')
+  check_if_should_cherry_pick:
+    name: Check if the commit should be cherry-picked
     runs-on: ubuntu-latest
     steps:
       - uses: actions/github-script@v4
         with:
           script: |
-            const commentBody = context.payload.comment.body
-            console.log(commentBody)
+            const commitMessage = context.payload.commits[0].message;
+            const pullRequestNumbers = Array.from(commitMessage.matchAll(/\(#(.*?)\)/g))
+
+            if (pullRequestNumbers.length === 0) {
+              return false;
+            }
+
+            if (pullRequestNumbers > 1) {
+              throw "Multiple PRs are associated with this commit";
+            }
+
+            const pullRequestNumber = pullRequestNumbers[0][1];
+
+            const { data } = await github.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pullRequestNumber
+            });
+
+            console.log(data.labels.some((label) => label.name === 'cherry-pick'))
+            return data.labels.some((label) => label.name === 'cherry-pick')
+
+  get_latest_release_branch:
+    name: Get latest release branch
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v4
+        with:
+          script: |
+            const releaseBranches = await github.git.listMatchingRefs({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: "heads/release-x.",
+            });
+
+            const getVersionFromBranch = branch => parseInt(branch.match(/release-x\.(.*?)\.x/)[1]);
+            const latestReleaseBranch = releaseBranches.reduce((prev, current) => getVersionFromBranch(prev.ref) > getVersionFromBranch(current.ref) ? prev : current);
+
+            console.log(latestReleaseBranch)
+            return latestReleaseBranch;
+
+  create_release_pull_request:
+    runs-on: ubuntu-latest
+    name: Create a PR with the commit
+    needs: [check_if_should_cherry_pick, get_latest_release_branch]
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
