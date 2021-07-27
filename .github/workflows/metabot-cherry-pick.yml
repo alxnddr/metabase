@@ -32,7 +32,6 @@ jobs:
               pull_number: pullRequestNumber
             });
 
-            console.log(data.labels.some((label) => label.name === 'cherry-pick'))
             return data.labels.some((label) => label.name === 'cherry-pick')
 
   get_latest_release_branch:
@@ -48,11 +47,11 @@ jobs:
               ref: "heads/release-x.",
             });
 
-            console.log(releaseBranches, "releaseBranches")
             const getVersionFromBranch = branch => parseInt(branch.match(/release-x\.(.*?)\.x/)[1]);
-            const latestReleaseBranch = releaseBranches.reduce((prev, current) => getVersionFromBranch(prev.ref) > getVersionFromBranch(current.ref) ? prev : current);
+            const latestReleaseBranch = releaseBranches.data.reduce((prev, current) => getVersionFromBranch(prev.ref) > getVersionFromBranch(current.ref) ? prev : current);
 
-            console.log(latestReleaseBranch)
+            console.log(`Latest release branch ref: ${latestReleaseBranch.ref}`)
+
             return latestReleaseBranch;
 
   create_release_pull_request:
