@@ -65,10 +65,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Create PR to branch
-        uses: gorillio/github-action-cherry-pick@master
+        uses: gorillio/github-action-cherry-pick@v1.2
         with:
           pr_branch: ${{ needs.get_latest_release_branch.outputs.result }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITBOT_EMAIL: alxnddr@gmail.com
-          DRY_RUN: false
+          INPUT_PR_BRANCH: ${{ needs.get_latest_release_branch.outputs.result }}
