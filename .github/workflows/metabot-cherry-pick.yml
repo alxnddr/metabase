@@ -1,0 +1,38 @@
+name: MetabotCherryPick
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  # pr_info:
+  #   runs-on: ubuntu-20.04
+  #   outputs:
+  #     pull_request_number: ${{ fromJson(steps.fetch_pr.outputs.data).head.number }}
+  #     branch_name: ${{ fromJson(steps.fetch_pr.outputs.data).head.ref }}
+  #     commit_sha: ${{ fromJson(steps.fetch_pr.outputs.data).head.sha }}
+  #   steps:
+  #     - name: Fetch issue
+  #       uses: octokit/request-action@v2.x
+  #       id: fetch_issue
+  #       with:
+  #         route: GET ${{ github.event.issue.url }}
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: Fetch PR
+  #       uses: octokit/request-action@v2.x
+  #       id: fetch_pr
+  #       with:
+  #         route: GET ${{ fromJson(steps.fetch_issue.outputs.data).pull_request.url }}
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  get_target_branch:
+    if: contains(github.event.comment.body, '@metabase-bot cherry-pick')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v4
+        with:
+          script: |
+            const commentBody = context.payload.comment.body
+            console.log(commentBody)
