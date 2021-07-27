@@ -48,9 +48,10 @@ jobs:
             });
 
             const getVersionFromBranch = branch => parseInt(branch.match(/release-x\.(.*?)\.x/)[1]);
-            const latestReleaseBranch = releaseBranches.data.reduce((prev, current) => getVersionFromBranch(prev.ref) > getVersionFromBranch(current.ref) ? prev : current);
+            const latestReleaseBranchRef = releaseBranches.data.reduce((prev, current) => getVersionFromBranch(prev.ref) > getVersionFromBranch(current.ref) ? prev : current);
+            const latestReleaseBranchName = latestReleaseBranchRef.replace(/^(refs\/heads\/\.)/,"");
 
-            console.log(`Latest release branch ref: ${latestReleaseBranch.ref}`)
+            console.log(`Latest release branch: ${latestReleaseBranchName}`)
 
             return latestReleaseBranch;
 
@@ -59,5 +60,13 @@ jobs:
     name: Create a PR with the commit
     needs: [check_if_should_cherry_pick, get_latest_release_branch]
     steps:
-      - name: checkout
+      - name: Checkout
         uses: actions/checkout@v2
+      - name: Create PR to branch
+        uses: gorillio/github-action-cherry-pick@master
+        with:
+          pr_branch: ${{ needs.get_latest_release_branch.outputs }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITBOT_EMAIL: alxnddr@gmail.com
+          DRY_RUN: false
