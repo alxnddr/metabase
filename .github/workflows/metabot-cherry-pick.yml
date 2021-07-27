@@ -65,7 +65,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Create PR to branch
-        uses: gorillio/github-action-cherry-pick@v1.2
+        uses: gorillio/github-action-cherry-pick@1.2
         with:
           pr_branch: ${{ needs.get_latest_release_branch.outputs.result }}
         env:
