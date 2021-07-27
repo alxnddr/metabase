@@ -9,8 +9,11 @@ jobs:
   check_if_should_cherry_pick:
     name: Check if the commit should be cherry-picked
     runs-on: ubuntu-latest
+    outputs:
+      should_cherry_pick: ${{ steps.get_should_cherry_pick.outputs.result }}
     steps:
       - uses: actions/github-script@v4
+        id: get_should_cherry_pick
         with:
           result-encoding: string
           script: |
@@ -38,8 +41,11 @@ jobs:
   get_latest_release_branch:
     name: Get latest release branch
     runs-on: ubuntu-latest
+    outputs:
+      branch_name: ${{ steps.get_branch_name.outputs.result }}
     steps:
       - uses: actions/github-script@v4
+        id: get_branch_name
         with:
           result-encoding: string
           script: |
@@ -67,9 +73,7 @@ jobs:
       - name: Create PR to branch
         uses: gorillio/github-action-cherry-pick@1.2
         with:
-          pr_branch: release-x.51.x
-          # ${{ needs.get_latest_release_branch.outputs.result }}
+          pr_branch: ${{ needs.get_latest_release_branch.outputs.branch_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITBOT_EMAIL: alxnddr@gmail.com
-          INPUT_PR_BRANCH: ${{ needs.get_latest_release_branch.outputs.result }}
