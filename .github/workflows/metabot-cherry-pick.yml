@@ -12,6 +12,7 @@ jobs:
     steps:
       - uses: actions/github-script@v4
         with:
+          result-encoding: string
           script: |
             const commitMessage = context.payload.commits[0].message;
             const pullRequestNumbers = Array.from(commitMessage.matchAll(/\(#(.*?)\)/g))
@@ -40,6 +41,7 @@ jobs:
     steps:
       - uses: actions/github-script@v4
         with:
+          result-encoding: string
           script: |
             const releaseBranches = await github.git.listMatchingRefs({
               owner: context.repo.owner,
@@ -48,12 +50,12 @@ jobs:
             });
 
             const getVersionFromBranch = branch => parseInt(branch.match(/release-x\.(.*?)\.x/)[1]);
-            const latestReleaseBranchRef = releaseBranches.data.reduce((prev, current) => getVersionFromBranch(prev.ref) > getVersionFromBranch(current.ref) ? prev : current);
-            const latestReleaseBranchName = latestReleaseBranchRef.replace(/^(refs\/heads\/\.)/,"");
+            const latestReleaseBranch = releaseBranches.data.reduce((prev, current) => getVersionFromBranch(prev.ref) > getVersionFromBranch(current.ref) ? prev : current);
+            const latestReleaseBranchName = latestReleaseBranch.ref.replace(/^(refs\/heads\/\.)/,"");
 
             console.log(`Latest release branch: ${latestReleaseBranchName}`)
 
-            return latestReleaseBranch;
+            return latestReleaseBranchName;
 
   create_release_pull_request:
     runs-on: ubuntu-latest
