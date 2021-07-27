@@ -51,7 +51,7 @@ jobs:
 
             const getVersionFromBranch = branch => parseInt(branch.match(/release-x\.(.*?)\.x/)[1]);
             const latestReleaseBranch = releaseBranches.data.reduce((prev, current) => getVersionFromBranch(prev.ref) > getVersionFromBranch(current.ref) ? prev : current);
-            const latestReleaseBranchName = latestReleaseBranch.ref.replace(/^(refs\/heads\/\.)/,"");
+            const latestReleaseBranchName = latestReleaseBranch.ref.replace(/^refs\/heads\//, "");
 
             console.log(`Latest release branch: ${latestReleaseBranchName}`)
 
@@ -67,7 +67,8 @@ jobs:
       - name: Create PR to branch
         uses: gorillio/github-action-cherry-pick@1.2
         with:
-          pr_branch: ${{ needs.get_latest_release_branch.outputs.result }}
+          pr_branch: release-x.51.x
+          # ${{ needs.get_latest_release_branch.outputs.result }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITBOT_EMAIL: alxnddr@gmail.com
