@@ -37,6 +37,10 @@ jobs:
             });
 
             const hasCherryPickLabel = data.labels.some((label) => label.name === 'cherry-pick');
+            const { title } = data
+
+            console.log(`PR #${pullRequestNumber}: "${title}" hasCherryPickLabel=${hasCherryPickLabel}`)
+
             return {
               title: data.title,
               hasCherryPickLabel
@@ -74,6 +78,7 @@ jobs:
     env:
       RELEASE_BRANCH: ${{ needs.get_latest_release_branch.outputs.branch_name }}
       ORIGINAL_PR_TITLE: ${{ needs.pr_info.outputs.title }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v2
         name: Checkout
