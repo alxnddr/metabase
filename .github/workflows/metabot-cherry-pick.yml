@@ -79,7 +79,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Create a PR with the commit
     needs: [pr_info, get_latest_release_branch]
-    if: ${{ needs.pr_info.should_cherry_pick == 'true' }}
+    if: ${{ needs.pr_info.outputs.should_cherry_pick == 'true' }}
     env:
       RELEASE_BRANCH: ${{ needs.get_latest_release_branch.outputs.branch_name }}
       ORIGINAL_PR_TITLE: ${{ needs.pr_info.outputs.title }}
