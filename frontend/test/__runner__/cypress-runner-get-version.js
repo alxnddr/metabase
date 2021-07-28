@@ -10,7 +10,7 @@ const getVersion = async () => {
     printCyan(version);
 
     printBold(
-      "If that version seems too old, please run `./bin/build version uberjar`.",
+      "_If that version seems too old, please run `./bin/build version uberjar`.",
     );
   } catch (e) {
     printBold(
