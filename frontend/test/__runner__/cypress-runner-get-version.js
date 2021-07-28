@@ -14,7 +14,7 @@ const getVersion = async () => {
     );
   } catch (e) {
     printBold(
-      "No version file found. Please run `./bin/build version uberjar`.",
+      "_No version file found. Please run `./bin/build version uberjar`.",
     );
 
     process.exit(1);
