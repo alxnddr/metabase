@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       title: ${{ fromJson(steps.get_should_cherry_pick.outputs.result).title }}
+      number: ${{ fromJson(steps.get_should_cherry_pick.outputs.result).pullRequestNumber }}
+      author: ${{ fromJson(steps.get_should_cherry_pick.outputs.result).author }}
       should_cherry_pick: ${{ fromJson(steps.get_should_cherry_pick.outputs.result).hasCherryPickLabel }}
     steps:
       - uses: actions/github-script@v4
@@ -37,11 +39,13 @@ jobs:
             });
 
             const hasCherryPickLabel = data.labels.some((label) => label.name === 'cherry-pick');
-            const { title } = data
+            const { title, user } = data
 
             console.log(`PR #${pullRequestNumber}: "${title}" hasCherryPickLabel=${hasCherryPickLabel}`)
 
             return {
+              author: user.login,
+              pullRequestNumber,
               title: data.title,
               hasCherryPickLabel
             }
@@ -107,8 +111,8 @@ jobs:
         with:
           script: |
             github.issues.createComment({
-              issue_number: context.issue.number,
+              issue_number: ${{ needs.pr_info.outputs.number }},
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '😩 could not automatically create a release PR'
+              body: '@${{ needs.pr_info.outputs.author }} could not automatically create a release PR 😩'
             })
