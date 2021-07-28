@@ -72,8 +72,6 @@ jobs:
     steps:
       - uses: actions/checkout@v1
         name: Checkout
-        # with:
-        #   fetch-depth: 0
       - name: Create PR to branch
         uses: gorillio/github-action-cherry-pick@1.2
         with:
