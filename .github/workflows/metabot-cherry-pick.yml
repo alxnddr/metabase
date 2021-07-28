@@ -74,17 +74,10 @@ jobs:
         name: Checkout
         with:
           fetch-depth: 0
-      - run: |
-          git config user.name github-actions
-          git config user.email alxnddr@gmail.com
-
-          PR_BRANCH="cherry-pick-$GITHUB_SHA"
-
-          git fetch --all
-          git checkout -b "${PR_BRANCH}" origin/"${RELEASE_BRANCH}"
-          git cherry-pick "${GITHUB_SHA}"
-          git push -u origin "${PR_BRANCH}"
-
-          PR_TITLE=$(git log -1 --format="%s" $GITHUB_SHA)
-
-          hub pull-request -b "${RELEASE_BRANCH}" -h "${PR_BRANCH}" -l "auto-cherry-picked" -a "${GITHUB_ACTOR}" -m "\"AUTO: ${PR_TITLE}\""
+      - name: Create PR to branch
+        uses: gorillio/github-action-cherry-pick@1.2
+        with:
+          pr_branch: ${{ needs.get_latest_release_branch.outputs.branch_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITBOT_EMAIL: alxnddr@gmail.com
