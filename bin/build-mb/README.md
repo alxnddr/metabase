@@ -25,4 +25,4 @@ Missing License: /Users/dan/.m2/repository/org/opensaml/opensaml-security-impl/3
 Missing License: /Users/dan/.m2/repository/colorize/colorize/0.1.1/colorize-0.1.1.jar
 ```
 
-You can check the overrides file (resources/overrides.edn) and add the license information there, or perhaps improve the license discovery mechanism in the code.
+You can  check the overrides file (resources/overrides.edn) and add the license information there, or perhaps improve the license discovery mechanism in the code.
