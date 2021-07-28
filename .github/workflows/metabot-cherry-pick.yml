@@ -75,6 +75,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Create a PR with the commit
     needs: [pr_info, get_latest_release_branch]
+    if: needs.pr_info.should_cherry_pick == 'true'
     env:
       RELEASE_BRANCH: ${{ needs.get_latest_release_branch.outputs.branch_name }}
       ORIGINAL_PR_TITLE: ${{ needs.pr_info.outputs.title }}
@@ -85,17 +86,6 @@ jobs:
         with:
           fetch-depth: 0
       - run: |
-          cat <<- EOF > $HOME/.netrc
-            machine github.com
-            login $GITHUB_ACTOR
-            password $GITHUB_TOKEN
-            machine api.github.com
-            login $GITHUB_ACTOR
-            password $GITHUB_TOKEN
-          EOF
-
-          chmod 600 $HOME/.netrc
-
           git config --global user.email "metabase-github-automation@metabase.com"
           git config --global user.name "$GITHUB_ACTOR"
 
@@ -106,4 +96,18 @@ jobs:
           git cherry-pick "${GITHUB_SHA}"
           git push -u origin "${PR_BRANCH}"
 
-          hub pull-request -b "${RELEASE_BRANCH}" -h "${PR_BRANCH}" -l "auto-cherry-picked" -a "${GITHUB_ACTOR}" -m "\"🍒 ${ORIGINAL_PR_TITLE}\""
+          hub pull-request -b "${RELEASE_BRANCH}" -h "${PR_BRANCH}" -l "auto-cherry-picked" -a "${GITHUB_ACTOR}" -m "🍒 \"${ORIGINAL_PR_TITLE}\""
+
+  notify_when_failed:
+    needs: [pr_info, create_release_pull_request]
+    if: ${{ failure() }}
+    steps:
+      - uses: actions/github-script@v4
+        with:
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '😩 could not automatically create a release PR'
+            })
