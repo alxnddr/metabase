@@ -6,16 +6,16 @@ on:
       - master
 
 jobs:
-  check_if_should_cherry_pick:
+  pr_info:
     name: Check if the commit should be cherry-picked
     runs-on: ubuntu-latest
     outputs:
-      should_cherry_pick: ${{ steps.get_should_cherry_pick.outputs.result }}
+      title: ${{ fromJson(steps.get_should_cherry_pick.outputs.result).title }}
+      should_cherry_pick: ${{ fromJson(steps.get_should_cherry_pick.outputs.result).hasCherryPickLabel }}
     steps:
       - uses: actions/github-script@v4
         id: get_should_cherry_pick
         with:
-          result-encoding: string
           script: |
             const commitMessage = context.payload.commits[0].message;
             const pullRequestNumbers = Array.from(commitMessage.matchAll(/\(#(.*?)\)/g))
@@ -36,7 +36,11 @@ jobs:
               pull_number: pullRequestNumber
             });
 
-            return data.labels.some((label) => label.name === 'cherry-pick')
+            const hasCherryPickLabel = data.labels.some((label) => label.name === 'cherry-pick');
+            return {
+              title: data.title,
+              hasCherryPickLabel
+            }
 
   get_latest_release_branch:
     name: Get latest release branch
@@ -66,18 +70,35 @@ jobs:
   create_release_pull_request:
     runs-on: ubuntu-latest
     name: Create a PR with the commit
-    needs: [check_if_should_cherry_pick, get_latest_release_branch]
+    needs: [pr_info, get_latest_release_branch]
     env:
       RELEASE_BRANCH: ${{ needs.get_latest_release_branch.outputs.branch_name }}
+      ORIGINAL_PR_TITLE: ${{ needs.pr_info.outputs.title }}
     steps:
       - uses: actions/checkout@v2
         name: Checkout
         with:
           fetch-depth: 0
-      - name: Create PR to branch
-        uses: gorillio/github-action-cherry-pick@1.2
-        with:
-          pr_branch: ${{ needs.get_latest_release_branch.outputs.branch_name }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITBOT_EMAIL: alxnddr@gmail.com
+      - run: |
+          cat <<- EOF > $HOME/.netrc
+            machine github.com
+            login $GITHUB_ACTOR
+            password $GITHUB_TOKEN
+            machine api.github.com
+            login $GITHUB_ACTOR
+            password $GITHUB_TOKEN
+          EOF
+
+          chmod 600 $HOME/.netrc
+
+          git config --global user.email "metabase-github-automation@metabase.com"
+          git config --global user.name "$GITHUB_ACTOR"
+
+          PR_BRANCH="cherry-pick-$GITHUB_SHA"
+
+          git fetch --all
+          git checkout -b "${PR_BRANCH}" origin/"${RELEASE_BRANCH}"
+          git cherry-pick "${GITHUB_SHA}"
+          git push -u origin "${PR_BRANCH}"
+
+          hub pull-request -b "${RELEASE_BRANCH}" -h "${PR_BRANCH}" -l "auto-cherry-picked" -a "${GITHUB_ACTOR}" -m "\"🍒 ${ORIGINAL_PR_TITLE}\""
