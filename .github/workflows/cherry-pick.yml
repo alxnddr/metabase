@@ -71,7 +71,7 @@ jobs:
             return {
               newBranch,
               targetBranch,
-              originalPullRequestTitle: originalPullRequest.title,
+              originalPullRequest,
               startSha: commits[0].sha,
               endSha: commits[commits.length - 1].sha
             }
@@ -88,7 +88,14 @@ jobs:
           git checkout "${NEW_BRANCH}"
           git reset --hard origin/${TARGET_BRANCH}
 
-          git cherry-pick ${START_SHA}^..${END_SHA}
+          if git show-ref --quiet refs/heads/${ORIGINAL_HEAD_REF}; then
+            echo "PR has been merged, searching for a squashed commit in the base branch"
+            git cherry-pick $(git log master --grep='(#${ORIGINAL_PULL_REQUEST_NUMBER})' --format="%H")
+          else
+            echo "PR has not been merged, copying all commits"
+            git cherry-pick ${START_SHA}^..${END_SHA}
+          fi
+
           git push origin "${NEW_BRANCH}" --force-with-lease
 
           if [[ $(hub pr list -b "${TARGET_BRANCH}" -h "${NEW_BRANCH}" -s "open") ]]; then
@@ -98,7 +105,10 @@ jobs:
               echo "PR has been created"
           fi
         env:
-          ORIGINAL_TITLE: ${{ fromJson(steps.branch_info.outputs.result).originalPullRequestTitle }}
+          ORIGINAL_TITLE: ${{ fromJson(steps.branch_info.outputs.result).originalPullRequest.title }}
+          ORIGINAL_BASE_REF: ${{ fromJson(steps.branch_info.outputs.result).originalPullRequest.base.ref }}
+          ORIGINAL_HEAD_REF: ${{ fromJson(steps.branch_info.outputs.result).originalPullRequest.head.ref }}
+          ORIGINAL_PULL_REQUEST_NUMBER: ${{ fromJson(steps.branch_info.outputs.result).originalPullRequest.number }}
           TARGET_BRANCH: ${{ fromJson(steps.branch_info.outputs.result).targetBranch }}
           NEW_BRANCH: ${{ fromJson(steps.branch_info.outputs.result).newBranch }}
           START_SHA: ${{ fromJson(steps.branch_info.outputs.result).startSha }}
