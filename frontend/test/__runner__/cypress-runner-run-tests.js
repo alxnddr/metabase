@@ -33,6 +33,7 @@ const parseArguments = async () => {
   return await cypress.cli.parseRunArguments(cliArgs);
 };
 
+// Random change for testing purpose
 // This overly complicated logic will not be needed once we merge "db" specs with the rest of the "normal" Cypress files.
 // Alternatively we can use the official `--project` flag to isolate "db" files but that would require a major refactor.
 const getSourceFolder = () => {
