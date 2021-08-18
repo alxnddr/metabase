@@ -94,4 +94,5 @@ const runCypress = async (baseUrl, exitFunction) => {
   }
 };
 
+// test
 module.exports = runCypress;
