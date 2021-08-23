@@ -71,6 +71,7 @@ const runCypress = async (baseUrl, exitFunction) => {
     userArgs,
   );
 
+  // test
   try {
     const { status, message, totalFailed, failures } = isOpenMode
       ? await cypress.open(finalConfig)
