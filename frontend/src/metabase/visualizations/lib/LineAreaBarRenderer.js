@@ -459,7 +459,7 @@ function doScatterChartStuff(chart, datas, index, { yExtent, yExtents }) {
         );
     } else {
       chart.radiusValueAccessor(d => 1);
-      chart.MIN_RADIUS = 3;
+      chart.MIN_RADIUS = 80;
     }
     chart.minRadiusWithLabel(Infinity);
   }
