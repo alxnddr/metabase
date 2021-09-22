@@ -112,4 +112,6 @@ jobs:
       - name: Percy Test
         run: yarn run test-visual-no-build
         env:
+          PERCY_DEBUG: "*"
+          LOG_LEVEL: "debug"
           PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
