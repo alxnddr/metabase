@@ -1,0 +1,46 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base",
+    ":preserveSemverRanges"
+  ],
+  "prHourlyLimit": 10,
+  "prConcurrentLimit": 20,
+  "postUpdateOptions": ["yarnDedupeFewer"],
+  "labels": ["dependencies", "bot"],
+  "vulnerabilityAlerts": {
+    "labels": ["security"],
+    "assignees": ["@metabase/core-developers"]
+  },
+  "enabledManagers": ["npm"],
+  "packageRules": [{
+      "matchDepTypes": ["devDependencies"],
+      "matchPackagePatterns": ["*"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "groupName": "Major devDependencies",
+      "groupSlug": "dev-minor-patch"
+    },
+    {
+      "matchDepTypes": ["devDependencies"],
+      "matchPackagePatterns": ["*"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "groupName": "Non-major devDependencies",
+      "groupSlug": "dev-major"
+    },
+    {
+      "matchDepTypes": ["dependencies"],
+      "matchPackagePatterns": ["*"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "Non-major dependencies",
+      "groupSlug": "minor-patch"
+    },
+    {
+      "matchDepTypes": ["dependencies"],
+      "groupName": "Major dependenices",
+      "groupSlug": "major",
+      "matchPackagePatterns": ["*"],
+      "matchUpdateTypes": ["major"],
+      "labels": ["breaking"]
+    }
+  ]
+}
