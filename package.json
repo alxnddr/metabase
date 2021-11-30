@@ -139,7 +139,7 @@
     "@types/diff": "^3.5.4",
     "@types/eslint": "7.28.1",
     "@types/glob": "^7.1.4",
-    "@types/history": "3.2.5",
+    "@types/history": "4.7.9",
     "@types/humanize-plus": "^1.8.0",
     "@types/icepick": "2.3.0",
     "@types/iframe-resizer": "^3.5.9",
