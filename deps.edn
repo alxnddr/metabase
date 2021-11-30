@@ -10,7 +10,7 @@
                                              :exclusions  [org.clojure/clojure
                                                            org.clojure/clojurescript]}
   amalloy/ring-gzip-middleware              {:mvn/version "0.1.4"}              ; Ring middleware to GZIP responses if client can handle it
-  bigml/histogram                           {:mvn/version "4.1.3"}              ; Histogram data structure
+  bigml/histogram                           {:mvn/version "4.1.4"}              ; Histogram data structure
   buddy/buddy-core                          {:mvn/version "1.10.1"              ; various cryptograhpic functions
                                              :exclusions  [commons-codec/commons-codec
                                                            org.bouncycastle/bcpkix-jdk15on
@@ -34,7 +34,7 @@
   com.clearspring.analytics/stream          {:mvn/version "2.9.8"               ; Various sketching algorithms
                                              :exclusions  [it.unimi.dsi/fastutil
                                                            org.slf4j/slf4j-api]}
-  com.draines/postal                        {:mvn/version "2.0.4"}              ; SMTP library
+  com.draines/postal                        {:mvn/version "2.0.5"}              ; SMTP library
   com.google.guava/guava                    {:mvn/version "30.1.1-jre"}         ; dep for BigQuery, Spark, and GA. Require here rather than letting different dep versions stomp on each other — see comments on #9697
   com.h2database/h2                         {:mvn/version "1.4.197"}            ; embedded SQL database
   com.taoensso/nippy                        {:mvn/version "3.1.1"}              ; Fast serialization (i.e., GZIP) library for Clojure
@@ -61,13 +61,13 @@
                                                            org.flatland/ordered
                                                            org.yaml/snakeyaml]}
   javax.xml.bind/jaxb-api                   {:mvn/version "2.4.0-b180830.0359"} ; add the `javax.xml.bind` classes which we're still using but were removed in Java 11
-  joda-time/joda-time                       {:mvn/version "2.10.10"}
+  joda-time/joda-time                       {:mvn/version "2.10.13"}
   kixi/stats                                {:mvn/version "0.4.4"               ; Various statistic measures implemented as transducers
                                              :exclusions  [org.clojure/data.avl]}
   me.raynes/fs                              {:mvn/version "1.4.6"               ; Filesystem tools
                                              :exclusions  [org.apache.commons/commons-compress]}
   medley/medley                             {:mvn/version "1.3.0"}              ; lightweight lib of useful functions
-  metabase/connection-pool                  {:mvn/version "1.1.1"}              ; simple wrapper around C3P0. JDBC connection pools
+  metabase/connection-pool                  {:mvn/version "1.2.0"}              ; simple wrapper around C3P0. JDBC connection pools
   metabase/saml20-clj                       {:mvn/version "2.0.0"}              ; EE SAML integration
   metabase/throttle                         {:mvn/version "1.0.2"}              ; Tools for throttling access to API endpoints and other code pathways
   net.cgrand/macrovich                      {:mvn/version "0.2.1"}              ; utils for writing macros for both Clojure & ClojureScript
@@ -85,11 +85,11 @@
   org.apache.logging.log4j/log4j-jcl        {:mvn/version "2.14.1"}             ; allows the commons-logging API to work with log4j 2
   org.apache.logging.log4j/log4j-liquibase  {:mvn/version "2.14.1"}             ; liquibase logging via log4j 2
   org.apache.logging.log4j/log4j-slf4j-impl {:mvn/version "2.14.1"}             ; allows the slf4j API to work with log4j 2
-  org.apache.poi/poi                        {:mvn/version "5.0.0"}              ; Work with Office documents (e.g. Excel spreadsheets) -- newer version than one specified by Docjure
+  org.apache.poi/poi                        {:mvn/version "5.1.0"}              ; Work with Office documents (e.g. Excel spreadsheets) -- newer version than one specified by Docjure
   org.apache.poi/poi-ooxml                  {:mvn/version "5.0.0"
                                              :exclusions  [org.bouncycastle/bcpkix-jdk15on
                                                            org.bouncycastle/bcprov-jdk15on]}
-  org.apache.sshd/sshd-core                 {:mvn/version "2.4.0"}              ; ssh tunneling and test server -- do not use 2.6.0 to 2.7.0, see metabase#18316
+  org.apache.sshd/sshd-core                 {:mvn/version "2.7.0"}              ; ssh tunneling and test server -- do not use 2.6.0 to 2.7.0, see metabase#18316
   org.apache.xmlgraphics/batik-all          {:mvn/version "1.14"}               ; SVG -> image
   org.clojars.pntblnk/clj-ldap              {:mvn/version "0.0.17"}             ; LDAP client
   org.bouncycastle/bcpkix-jdk15on           {:mvn/version "1.69"}               ; Bouncy Castle crypto library -- explicit version of BC specified to resolve illegal reflective access errors
@@ -111,12 +111,12 @@
   org.clojure/tools.reader                  {:mvn/version "1.3.6"}
   org.clojure/tools.trace                   {:mvn/version "0.7.11"}             ; function tracing
   org.eclipse.jetty/jetty-server            {:mvn/version "9.4.43.v20210629"}   ; web server
-  org.flatland/ordered                      {:mvn/version "1.5.9"}              ; ordered maps & sets
-  org.graalvm.js/js                         {:mvn/version "21.2.0"}           ; JavaScript engine
+  org.flatland/ordered                      {:mvn/version "1.15.10"}              ; ordered maps & sets
+  org.graalvm.js/js                         {:mvn/version "21.3.0"}           ; JavaScript engine
   org.liquibase/liquibase-core              {:mvn/version "3.6.3"               ; migration management (Java lib)
                                              :exclusions  [ch.qos.logback/logback-classic]}
-  org.mariadb.jdbc/mariadb-java-client      {:mvn/version "2.6.2"}              ; MySQL/MariaDB driver
-  org.postgresql/postgresql                 {:mvn/version "42.2.23"}            ; Postgres driver
+  org.mariadb.jdbc/mariadb-java-client      {:mvn/version "2.7.4"}              ; MySQL/MariaDB driver
+  org.postgresql/postgresql                 {:mvn/version "42.3.1"}            ; Postgres driver
   org.slf4j/slf4j-api                       {:mvn/version "1.7.32"}             ; abstraction for logging frameworks -- allows end user to plug in desired logging framework at deployment time
   org.tcrawley/dynapath                     {:mvn/version "1.1.0"}              ; Dynamically add Jars (e.g. Oracle or Vertica) to classpath
   org.threeten/threeten-extra               {:mvn/version "1.7.0"}              ; extra Java 8 java.time classes like DayOfMonth and Quarter
@@ -124,7 +124,7 @@
   potemkin/potemkin                         {:mvn/version "0.4.5"               ; utility macros & fns
                                              :exclusions  [riddley/riddley]}
   pretty/pretty                             {:mvn/version "1.0.5"}              ; protocol for defining how custom types should be pretty printed
-  prismatic/schema                          {:mvn/version "1.1.12"}             ; Data schema declaration and validation library
+  prismatic/schema                          {:mvn/version "1.2.0"}             ; Data schema declaration and validation library
   redux/redux                               {:mvn/version "0.1.4"}              ; Utility functions for building and composing transducers
   riddley/riddley                           {:mvn/version "0.2.0"}              ; code walking lib -- used interally by Potemkin, manifold, etc.
   ring/ring-core                            {:mvn/version "1.9.4"}              ; web server (Jetty wrapper)
@@ -172,7 +172,7 @@
                                                            :exclusions  [slingshot/slingshot]}
     cloverage/cloverage                                   {:mvn/version "1.2.2"}
     eftest/eftest                                         {:mvn/version "0.5.9"}
-    jonase/eastwood                                       {:mvn/version "0.9.6"}
+    jonase/eastwood                                       {:mvn/version "0.9.9"}
     lein-check-namespace-decls/lein-check-namespace-decls {:mvn/version "1.0.4"} ; misnomer since this works on Clojure CLI now too
     pjstadig/humane-test-output                           {:mvn/version "0.11.0"}
     reifyhealth/specmonstah                               {:mvn/version "2.0.0"}
@@ -398,7 +398,7 @@
   ;; clojure -T:build uberjar :edition :ee
   :build
   {:deps       {io.github.clojure/tools.build   {:git/tag "v0.1.6", :git/sha "5636e61"}
-                com.github.seancorfield/depstar {:mvn/version "2.1.278"}
+                com.github.seancorfield/depstar {:mvn/version "2.1.303"}
                 metabase/build.common           {:local/root "bin/common"}
                 metabase/buid-mb                {:local/root "bin/build-mb"}}
    :ns-default build}

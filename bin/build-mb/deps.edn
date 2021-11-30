@@ -4,7 +4,7 @@
  {common/common               {:local/root "../common"}
   build-drivers/build-drivers {:local/root "../build-drivers"}
   i18n/i18n                   {:local/root "../i18n"}
-  org.flatland/ordered        {:mvn/version "1.5.7"}}
+  org.flatland/ordered        {:mvn/version "1.15.10"}}
 
  :aliases
  {:test {:extra-paths ["test"]
@@ -13,5 +13,5 @@
 
                        ;; the following deps are to have jars on the classpath for testing
                        org.apache.commons/commons-math3 {:mvn/version "3.6.1"}
-                       net.redhogs.cronparser/cron-parser-core {:mvn/version "3.4"}}
+                       net.redhogs.cronparser/cron-parser-core {:mvn/version "3.5"}}
          :main-opts   ["-m" "cognitect.test-runner"]}}}

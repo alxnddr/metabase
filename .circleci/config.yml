@@ -106,7 +106,7 @@ executors:
           MB_DB_DBNAME: circle_test
           MB_DB_USER: root
           MB_MYSQL_TEST_USER: root
-      - image: circleci/mariadb:10.2.23
+      - image: circleci/mariadb:10.7.1
 
   mariadb-latest:
     working_directory: /home/circleci/metabase/metabase/
