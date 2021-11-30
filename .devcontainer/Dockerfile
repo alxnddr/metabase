@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/vscode/devcontainers/java:11
+FROM mcr.microsoft.com/vscode/devcontainers/java:17
 
 RUN apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com\
   && apt-get update && export DEBIAN_FRONTEND=noninteractive \

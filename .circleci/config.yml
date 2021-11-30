@@ -47,7 +47,7 @@ executors:
           MB_DB_DBNAME: circle_test
           MB_DB_USER: circle_test
           MB_POSTGRESQL_TEST_USER: circle_test
-      - image: circleci/postgres:9.6-alpine
+      - image: circleci/postgres:12.1-alpine
         environment:
           POSTGRES_USER: circle_test
           POSTGRES_DB: circle_test
@@ -80,7 +80,7 @@ executors:
           MB_DB_DBNAME: circle_test
           MB_DB_USER: root
           MB_MYSQL_TEST_USER: root
-      - image: circleci/mysql:5.7.23
+      - image: circleci/mysql:8.0.27
 
   mysql-latest:
     working_directory: /home/circleci/metabase/metabase/
@@ -129,7 +129,7 @@ executors:
      working_directory: /home/circleci/metabase/metabase/
      docker:
        - image: metabase/ci:circleci-java-11-clj-1.10.3.929-07-27-2021-node-browsers
-       - image: circleci/mongo:4.0
+       - image: circleci/mongo:5.0
 
   mongo-latest:
      working_directory: /home/circleci/metabase/metabase/
@@ -187,7 +187,7 @@ executors:
           MB_SQLSERVER_TEST_HOST: localhost
           MB_SQLSERVER_TEST_PASSWORD: 'P@ssw0rd'
           MB_SQLSERVER_TEST_USER: SA
-      - image: mcr.microsoft.com/mssql/server:2017-latest
+      - image: mcr.microsoft.com/mssql/server:2019-latest
         environment:
           ACCEPT_EULA: Y
           SA_PASSWORD: 'P@ssw0rd'

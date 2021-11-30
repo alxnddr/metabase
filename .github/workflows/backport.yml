@@ -11,7 +11,7 @@ jobs:
     if: contains(github.event.comment.body, '@metabase-bot backport')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/github-script@v4
+      - uses: actions/github-script@v5
         id: branch_info
         with:
           script: |
@@ -116,7 +116,7 @@ jobs:
     needs: create_pull_request
     if: ${{ failure() }}
     steps:
-      - uses: actions/github-script@v4
+      - uses: actions/github-script@v5
         with:
           script: |
             const { GITHUB_SERVER_URL, GITHUB_REPOSITORY, GITHUB_RUN_ID} = process.env;

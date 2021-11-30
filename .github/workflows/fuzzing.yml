@@ -24,7 +24,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Prepare Node.js
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v2
       with:
         node-version: 14.x
     - name: Get M2 cache
@@ -49,7 +49,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Prepare Node.js
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v2
       with:
         node-version: 14.x
     - name: Get M2 cache
