@@ -15,7 +15,7 @@ export type GroupPermissions = {
   [key: DatabaseId]: DatabasePermissions;
 };
 
-export type DownloadPermission = "full" | "limited" | "none";
+export type DownloadPermission = "full" | "limited";
 
 export type DownloadAccessPermission = {
   schemas: DownloadSchemasPermission;
