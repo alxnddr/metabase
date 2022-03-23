@@ -1,0 +1,37 @@
+name: Create Backport
+inputs:
+  target-branch:
+    required: true
+  original-pull-request-number:
+    required: true
+  original-title:
+    required: true
+  github-token:
+    required: true
+  commit:
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        git config --global user.email "metabase-github-automation@metabase.com"
+        git config --global user.name "$GITHUB_ACTOR"
+
+        BACKPORT_BRANCH="backport-$COMMIT"
+
+        git checkout ${TARGET_BRANCH}
+        git fetch --all
+        git checkout -b ${BACKPORT_BRANCH}
+        git cherry-pick ${COMMIT}
+        git push -u origin ${BACKPORT_BRANCH}
+
+        hub pull-request -b "${TARGET_BRANCH}" -h "${BACKPORT_BRANCH}" -l "auto-backported" -a "${GITHUB_ACTOR}" -F- <<<"🤖 backported \"${ORIGINAL_TITLE}\" \n\n \#${ORIGINAL_PULL_REQUEST_NUMBER}"
+
+      shell: bash
+      env:
+        TARGET_BRANCH: ${{ inputs.target-branch }}
+        ORIGINAL_PULL_REQUEST_NUMBER: ${{ inputs.original-pull-request-number }}
+        ORIGINAL_TITLE: ${{ inputs.original-title }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        COMMIT: ${{ inputs.commit }}
