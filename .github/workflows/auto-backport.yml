@@ -1,11 +1,11 @@
 name: Auto-backport
 on:
   pull_request:
-    types: [closed, labeled]
+    # types: [closed, labeled]
 
 jobs:
   create-backport:
-    if: github.event.pull_request.merged == true && (contains(github.event.pull_request.labels.*.name, 'backport') || github.event.label.name == 'backport')
+    # if: github.event.pull_request.merged == true && (contains(github.event.pull_request.labels.*.name, 'backport') || github.event.label.name == 'backport')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
