@@ -1,0 +1,54 @@
+name: Create Backport
+inputs:
+  target-branch:
+    required: true
+  original-pull-request-number:
+    required: true
+  original-title:
+    required: true
+  github-token:
+    required: true
+  commit:
+    required: true
+
+outputs:
+  has-conflicts:
+    value: ${{ steps.create-backport-pull-request.outputs.has-conflicts }}
+
+runs:
+  using: "composite"
+  steps:
+    - id: create-backport-pull-request
+      run: |
+        git config --global user.email "metabase-github-automation@metabase.com"
+        git config --global user.name "$GITHUB_ACTOR"
+
+        BACKPORT_BRANCH="backport-$COMMIT"
+
+        git checkout ${TARGET_BRANCH}
+        git fetch --all
+        git checkout -b ${BACKPORT_BRANCH}
+        git cherry-pick ${COMMIT}
+        git checkout master
+
+        CONFLICTS=$(git ls-files -u | wc -l)
+        if [ "$CONFLICTS" -gt 0 ]; then
+          echo "Could not cherry pick because of a conflict"
+          echo "::set-output name=has-conflicts::true"
+          git cherry-pick --abort
+          exit 0
+        fi
+
+        git push -u origin ${BACKPORT_BRANCH}
+
+        hub pull-request -b "${TARGET_BRANCH}" -h "${BACKPORT_BRANCH}" -l "auto-backported" -a "${GITHUB_ACTOR}" -F- <<<"🤖 backported \"${ORIGINAL_TITLE}\"
+
+        #${ORIGINAL_PULL_REQUEST_NUMBER}"
+
+      shell: bash
+      env:
+        TARGET_BRANCH: ${{ inputs.target-branch }}
+        ORIGINAL_PULL_REQUEST_NUMBER: ${{ inputs.original-pull-request-number }}
+        ORIGINAL_TITLE: ${{ inputs.original-title }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        COMMIT: ${{ inputs.commit }}
