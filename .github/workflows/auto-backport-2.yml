@@ -1,0 +1,46 @@
+name: Auto-backport-2
+on:
+  pull_request:
+    types: [closed, labeled]
+
+jobs:
+  create-backport-2:
+    if: github.event.pull_request.merged == true && (contains(github.event.pull_request.labels.*.name, 'backport') || github.event.label.name == 'backport')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/find-squashed-commit-2
+        name: Find commit
+        id: find_commit
+        with:
+          pull-request-number: ${{ github.event.pull_request.number }}
+          base-ref: ${{ github.event.pull_request.base.ref }}
+
+      - uses: ./.github/actions/get-latest-release-branch-2
+        name: Get latest release branch
+        id: get_latest_release_branch
+
+      - uses: ./.github/actions/create-backport-pull-request-2
+        name: Create backport pull request
+        id: create_backport_pull_request
+        with:
+          target-branch: ${{ steps.get_latest_release_branch.outputs.branch-name }}
+          original-pull-request-number: ${{ github.event.pull_request.number }}
+          original-title: ${{ github.event.pull_request.title }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          commit: ${{ steps.find_commit.outputs.commit }}
+
+      - uses: ./.github/actions/notify-pull-request-2
+        if: ${{ steps.create_backport_pull_request.outputs.has-conflicts == 'true' }}
+        with:
+          include-log: false
+          message: could not create a backport due to conflicts
+
+      - uses: ./.github/actions/notify-pull-request-2
+        if: ${{ failure() }}
+        with:
+          include-log: true
+          message: something went wrong while creating a backport
