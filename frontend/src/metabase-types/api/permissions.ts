@@ -46,7 +46,7 @@ export type DatabaseAccessPermissions = {
   schemas: SchemasPermissions;
 };
 
-export type NativePermissions = "read" | "write" | "none";
+export type NativePermissions = "read" | "write";
 
 export type SchemasPermissions =
   | "all"
