@@ -1,9 +1,9 @@
 # Triggers Percy job on pull requests contain "visual" label
-name: PercyIssueComment
+name: Percy visual tests
 
 on:
   pull_request:
-    types: [syncronized, labeled]
+    types: [synchronize, labeled]
 
 jobs:
   percy:
