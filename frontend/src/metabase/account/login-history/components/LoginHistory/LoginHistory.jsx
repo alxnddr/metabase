@@ -66,7 +66,7 @@ function LoginHistoryList({ loginHistory }) {
   if (!items || !items.length) {
     return (
       <EmptyState
-        title={t`No logins`}
+        title={t`No logins!!!`}
         illustrationElement={<img src={NoResults} />}
       />
     );
