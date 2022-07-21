@@ -27,5 +27,5 @@ jobs:
           MERGE_RETRY_SLEEP: "5000"
           MERGE_REQUIRED_APPROVALS: "0"
           MERGE_DELETE_BRANCH: "true"
-          MERGE_FILTER_AUTHOR: metabase-bot-test
+          MERGE_FILTER_AUTHOR: "metabase-bot-test[bot]"
           UPDATE_LABELS: ""
