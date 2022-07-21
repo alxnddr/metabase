@@ -12,7 +12,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: tibdex/github-app-token@v1
+      - uses: tibdex/github-app-token@v1.6.0
         id: generate-token
         with:
           app_id: ${{ secrets.METABASE_BOT_APP_ID }}
@@ -53,7 +53,7 @@ jobs:
           git checkout master
           git push -u origin ${BACKPORT_BRANCH}
 
-          hub pull-request -b "${TARGET_BRANCH}" -h "${BACKPORT_BRANCH}" -l "auto-backported" -a "${GITHUB_ACTOR}" -F- <<<"🤖 backported \"${ORIGINAL_TITLE}\"
+          hub pull-request -b "${TARGET_BRANCH}" -h "${BACKPORT_BRANCH}" -l "auto-backported,automerge" -a "${GITHUB_ACTOR}" -F- <<<"🤖 backported \"${ORIGINAL_TITLE}\"
 
           #${ORIGINAL_PULL_REQUEST_NUMBER}"
         env:
