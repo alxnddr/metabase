@@ -1,4 +1,4 @@
-export const LOCALE_TIMEOUT = 300;
+export const LOCALE_TIMEOUT = 500;
 
 export const WELCOME_STEP = 0;
 export const LANGUAGE_STEP = 1;
