@@ -1,8 +1,9 @@
 name: Backport automerge
 on:
-  pull_request:
-    branches:
-      - "release-**"
+  check_suite:
+    types:
+      - completed
+  status: {}
 jobs:
   automerge:
     runs-on: ubuntu-latest
