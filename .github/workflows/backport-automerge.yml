@@ -31,4 +31,6 @@ jobs:
           MERGE_RETRIES: "2"
           MERGE_RETRY_SLEEP: "5000"
           MERGE_REQUIRED_APPROVALS: "0"
+          MERGE_DELETE_BRANCH: "true"
+          MERGE_FILTER_AUTHOR: metabase-bot-test
           UPDATE_LABELS: ""
