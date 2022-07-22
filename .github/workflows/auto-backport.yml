@@ -66,7 +66,6 @@ jobs:
           COMMIT: ${{ steps.find_commit.outputs.commit }}
 
       - name: Enable Pull Request Automerge
-        if: steps.cpr.outputs.pull-request-operation == 'created'
         uses: peter-evans/enable-pull-request-automerge@v2
         with:
           token: ${{ steps.generate-token.outputs.token }}
