@@ -28,6 +28,7 @@ jobs:
         id: get_latest_release_branch
 
       - id: create_backport_pull_request
+        name: Create backport pull request
         run: |
           git config --global user.email "metabase-bot-test@metabase.com"
           git config --global user.name "Metabase bot"
@@ -64,6 +65,12 @@ jobs:
           ORIGINAL_TITLE: ${{ github.event.pull_request.title }}
           GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
           COMMIT: ${{ steps.find_commit.outputs.commit }}
+
+      - name: Auto approve backport PR
+        uses: juliangruber/approve-pull-request-action@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          number: ${{ steps.create_backport_pull_request.outputs.backport_pr_number }}
 
       - name: Enable Pull Request Automerge
         uses: peter-evans/enable-pull-request-automerge@v2
