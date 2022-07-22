@@ -5,7 +5,7 @@ export const PARAMETER_OPERATOR_TYPES = {
     {
       type: "number/=",
       operator: "=",
-      name: t`Equal to`,
+      name: t`=`,
     },
     {
       type: "number/!=",
