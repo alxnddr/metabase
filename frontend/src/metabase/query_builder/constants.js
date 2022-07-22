@@ -3,7 +3,7 @@ export const MODAL_TYPES = {
   ADD_TO_DASHBOARD: "add-to-dashboard",
   MOVE: "move",
   CLONE: "clone",
-  ARCHIVE: "archive",
+  ARCHIVE: "archive1",
   SAVED: "saved",
   ADD_TO_DASHBOARD_SAVE: "add-to-dashboard-save",
   CREATE_ALERT: "create-alert",
