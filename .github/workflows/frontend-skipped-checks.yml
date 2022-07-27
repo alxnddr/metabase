@@ -1,0 +1,43 @@
+name: Frontend Skipped Checks
+
+on:
+  push:
+    branches:
+      - "master"
+      - "release-**"
+    paths:
+      - "docs/**"
+      - "**.md"
+      - ".circleci/**"
+      - "**.unit.spec.*"
+
+jobs:
+  fe-linter-prettier:
+    runs-on: ubuntu-latest
+    steps:
+      - run: 'echo "No build required" '
+
+  fe-linter-eslint:
+    runs-on: ubuntu-latest
+    steps:
+      - run: 'echo "No build required" '
+
+  fe-type-check:
+    runs-on: ubuntu-latest
+    steps:
+      - run: 'echo "No build required" '
+
+  fe-tests-unit:
+    runs-on: ubuntu-latest
+    steps:
+      - run: 'echo "No build required" '
+
+  fe-tests-timezones:
+    runs-on: ubuntu-latest
+    steps:
+      - run: 'echo "No build required" '
+
+  fe-chromatic:
+    runs-on: ubuntu-latest
+    steps:
+      - run: 'echo "No build required" '
