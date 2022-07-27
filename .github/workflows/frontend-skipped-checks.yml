@@ -1,9 +1,9 @@
-name: Frontend Skipped Checks
+name: Frontend
 
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-    paths-ignore:
+    paths:
       - "docs/**"
       - "**.md"
       - ".circleci/**"
