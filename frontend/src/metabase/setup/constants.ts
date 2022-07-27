@@ -11,7 +11,7 @@ export const STEPS: Record<number, string> = {
   [WELCOME_STEP]: "welcome",
   [LANGUAGE_STEP]: "language",
   [USER_STEP]: "user_info",
-  [DATABASE_STEP]: "db_connection",
+  [DATABASE_STEP]: "db___connection",
   [PREFERENCES_STEP]: "data_usage",
   [COMPLETED_STEP]: "completed",
 };
