@@ -1,0 +1,12 @@
+name: Testing
+
+on:
+  push:
+    paths-ignore:
+      - "**.md"
+
+jobs:
+  job1:
+    runs-on: ubuntu-latest
+    steps:
+      - run: 'echo "Required job 1" '
