@@ -1,16 +1,13 @@
 name: Frontend
 
 on:
-  push:
-    branches:
-      - "master"
-      - "release-**"
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     paths-ignore:
       - "docs/**"
       - "**.md"
       - ".circleci/**"
       - "**.unit.spec.*"
-  pull_request:
 
 jobs:
   fe-linter-prettier:

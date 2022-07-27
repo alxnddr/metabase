@@ -1,16 +1,13 @@
 name: Frontend Skipped Checks
 
 on:
-  push:
-    branches:
-      - "master"
-      - "release-**"
-    paths:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
       - "docs/**"
       - "**.md"
       - ".circleci/**"
       - "**.unit.spec.*"
-
 jobs:
   fe-linter-prettier:
     runs-on: ubuntu-latest
