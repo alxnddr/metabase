@@ -1,1 +1,1 @@
-export const ANALYTICS_CONTEXT = "Collection Landing";
+export const ANALYTICS_CONTEXT = "Collection Landing!";
