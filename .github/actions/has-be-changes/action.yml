@@ -11,6 +11,11 @@ runs:
     - name: Build static viz frontend
       run: yarn build-static-viz
       shell: bash
+    - name: debug
+      shell: bash
+      run: |
+        echo "static viz bundle hash"
+        sha1sum ./resources/frontend_client/app/dist/lib-static-viz.bundle.js
     - uses: actions/cache/restore@v3
       id: cache
       with:
