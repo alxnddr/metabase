@@ -1,0 +1,29 @@
+name: Backend
+
+on:
+  push:
+    branches:
+      - "master"
+      - "release-**"
+  pull_request:
+    paths:
+      - "docs/**"
+      - "**.md"
+      # frontend and E2E tests
+      - "**/frontend/test/**"
+      - "**/frontend/**.unit.*"
+
+jobs:
+  has-be-changes:
+    steps:
+      - name: Check if there are any BE changes
+        uses: ./.github/actions/save-static-viz-bundle-hash
+
+  be-specs:
+    if: ${{ steps.has-be-changes.outputs.value == 'true' }}
+    needs: has-be-changes
+    runs-on: ubuntu-20.04
+    timeout-minutes: 10
+    steps:
+      - run: |
+          echo "BE tests go brrr"
