@@ -77,7 +77,7 @@ export const XYChart = ({
 
   const yLabelOffsetLeft = yTickWidths.left + LABEL_PADDING;
   const yLabelOffsetRight = LABEL_PADDING;
-  const xTickVerticalMargins = style.axes.labels.fontSize * 2;
+  const xTickVerticalMargins = style.axes.labels.fontSize * 3;
 
   const showValues = settings.visualization_settings["graph.show_values"];
 
