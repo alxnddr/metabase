@@ -15,13 +15,15 @@ on:
 
 jobs:
   has-be-changes:
+    runs-on: ubuntu-20.04
     steps:
+      - uses: actions/checkout@v3
       - name: Check if there are any BE changes
-        uses: ./.github/actions/save-static-viz-bundle-hash
+        uses: ./.github/actions/has-be-changes
 
   be-specs:
-    if: ${{ steps.has-be-changes.outputs.value == 'true' }}
     needs: has-be-changes
+    if: ${{ needs.has-be-changes.outputs.value == 'true' }}
     runs-on: ubuntu-20.04
     timeout-minutes: 10
     steps:

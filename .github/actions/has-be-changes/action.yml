@@ -10,14 +10,9 @@ runs:
     - uses: actions/checkout@v3
     - name: Build static viz frontend
       run: yarn build-static-viz
+      shell: bash
     - uses: actions/cache/restore@v3
       id: cache
       with:
         path: static-viz-stub-empty-file
         key: ${{ hashFiles('**/resources/frontend_client/app/dist/lib-static-viz.bundle.js') }}
-    # - uses: dorny/paths-filter@v2
-    #   id: changes
-    #   with:
-    #     filters: |
-    #       be:
-    #         - 'src/**'

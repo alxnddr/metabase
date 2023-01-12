@@ -1,6 +1,6 @@
 import { t } from "ttag";
 
-export const DEFAULT_COLLECTION_COLOR_ALIAS = "brand";
+export const DEFAULT_COLLECTION_COLOR_ALIAS = "brand!";
 
 export const ROOT_COLLECTION = {
   id: "root",
