@@ -66,7 +66,7 @@
   (log-level->keyword (.getLevel (effective-ns-logger a-namespace))))
 
 (defn- exact-ns-logger
-  "Get the logger defined for `a-namespace` if it is an exact match; otherwise `nil` if a 'parent' logger will be used."
+  "_Get the logger defined for `a-namespace` if it is an exact match; otherwise `nil` if a 'parent' logger will be used."
   ^LoggerConfig [a-namespace]
   (let [logger (effective-ns-logger a-namespace)]
     (when (= (.getName logger) (logger-name a-namespace))
@@ -163,39 +163,39 @@
 (p/defrecord+ ^:private InMemoryAppender [appender-name state]
   Appender
   (append [_this event]
-    (let [event ^LogEvent event]
-      (swap! state update :logs (fn [logs]
-                                  (conj (vec logs)
-                                        [(log-level->keyword (.getLevel event))
-                                         (.getThrown event)
-                                         (str (.getMessage event))
-                                         #_(.getLoggerName event)]))))
-    nil)
+          (let [event ^LogEvent event]
+            (swap! state update :logs (fn [logs]
+                                        (conj (vec logs)
+                                              [(log-level->keyword (.getLevel event))
+                                               (.getThrown event)
+                                               (str (.getMessage event))
+                                               #_(.getLoggerName event)]))))
+          nil)
   (getHandler [_this]
-    (:error-handler @state))
+              (:error-handler @state))
   (getLayout [_this])
   (getName [_this]
-    appender-name)
+           appender-name)
   (ignoreExceptions [_this]
-    true)
+                    true)
   (setHandler [_this new-handler]
-    (swap! state assoc :error-handler new-handler))
+              (swap! state assoc :error-handler new-handler))
 
   LifeCycle
   (getState [_this])
   (initialize [_this])
   (isStarted [_this]
-    (not (:stopped @state)))
+             (not (:stopped @state)))
   (isStopped [_this]
-    (boolean (:stopped @state)))
+             (boolean (:stopped @state)))
   (start [_this]
-    (swap! state assoc :stopped false))
+         (swap! state assoc :stopped false))
   (stop [_this]
-    (swap! state assoc :stopped true))
+        (swap! state assoc :stopped true))
 
   IInMemoryAppender
   (appender-logs [_this]
-    (:logs @state)))
+                 (:logs @state)))
 
 (defn do-with-log-messages-for-level [a-namespace level f]
   (test-runner.parallel/assert-test-is-not-parallel "with-log-messages-for-level")
