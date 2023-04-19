@@ -13,7 +13,7 @@ const COMMON_SETTINGS = {
     widget: "input",
     getDefault: series => (series.length === 1 ? series[0].card.name : null),
     dashboard: true,
-    useRawSeries: true,
+    useRawSeries: false,
   },
   "card.description": {
     title: t`Description`,
