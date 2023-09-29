@@ -9,7 +9,7 @@ import {
 
 const COMMON_SETTINGS = {
   "card.title": {
-    title: t`Title`,
+    title: t`Title!!!`,
     widget: "input",
     getDefault: series => (series.length === 1 ? series[0].card.name : null),
     dashboard: true,
