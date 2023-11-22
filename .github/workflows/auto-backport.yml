@@ -30,7 +30,6 @@ jobs:
       - id: create_backport_pull_request
         name: Create backport pull request
         run: |
-          git config --global http.extraheader "Authorization: Bearer ${GITHUB_TOKEN}"
           git config --global user.email "metabase-bot@metabase.com"
           git config --global user.name "Metabase bot"
 
