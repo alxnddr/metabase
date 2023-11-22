@@ -2,7 +2,7 @@ import type { EnabledSearchModelType } from "metabase-types/api";
 
 export const SearchFilterKeys = {
   Type: "type",
-  Verified: "!veerified",
+  Verified: "verified",
   CreatedBy: "created_by",
   CreatedAt: "created_at",
   LastEditedBy: "last_edited_by",
