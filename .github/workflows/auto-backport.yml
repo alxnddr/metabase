@@ -30,11 +30,13 @@ jobs:
       - id: create_backport_pull_request
         name: Create backport pull request
         run: |
+          git config --global http.extraheader "Authorization: Bearer ${GITHUB_TOKEN}"
           git config --global user.email "metabase-bot@metabase.com"
           git config --global user.name "Metabase bot"
 
           BACKPORT_BRANCH="backport-$COMMIT"
 
+          # Checkout the target branch and create a new backport branch
           git checkout ${TARGET_BRANCH}
           git fetch --all
           git checkout -b ${BACKPORT_BRANCH}
@@ -42,23 +44,32 @@ jobs:
 
           CONFLICTS=$(git ls-files -u | wc -l)
           if [ "$CONFLICTS" -gt 0 ]; then
-            echo "Could not cherry pick because of a conflict"
-            echo "has-conflicts=true" >> $GITHUB_OUTPUT
-            git cherry-pick --abort
-            git checkout master
-            exit 0
+              echo "Could not cherry pick because of a conflict"
+              echo "has-conflicts=true" >> $GITHUB_OUTPUT
+              # Add a shell script for resolving conflicts
+              echo "git reset HEAD~1" > ./backport.sh
+              echo "rm ./backport.sh" >> ./backport.sh
+              echo "git cherry-pick ${COMMIT}" >> ./backport.sh
+              chmod +x ./backport.sh
+              git add ./backport.sh
+              git commit -m "Add backport resolution script"
+              PR_BODY="🤖 backported \"${ORIGINAL_TITLE}\"\n\n[!IMPORTANT]\nManual conflict resolution is required. Checkout the branch and run \`./backport.sh\` script"
+          else
+              echo "has-conflicts=false" >> $GITHUB_OUTPUT
+              PR_BODY="🤖 backported \"${ORIGINAL_TITLE}\""
           fi
 
-          echo "has-conflicts=false" >> $GITHUB_OUTPUT
-
-          git checkout master
           git push -u origin ${BACKPORT_BRANCH}
 
-          BACKPORT_PR_URL=$(gh pr create --base "${TARGET_BRANCH}" --head "${BACKPORT_BRANCH}" --label "was-backported" --assignee "${GITHUB_ACTOR}" --title "🤖 backported \"${ORIGINAL_TITLE}\"" --body "#${ORIGINAL_PULL_REQUEST_NUMBER}")
+          BACKPORT_PR_URL=$(gh pr create --base "${TARGET_BRANCH}" --head "${BACKPORT_BRANCH}" --label "was-backported" --assignee "${GITHUB_ACTOR}" --title "🤖 backported \"${ORIGINAL_TITLE}\"" --body "${PR_BODY}")
           BACKPORT_PR_NUMBER=${BACKPORT_PR_URL##*/}
 
           echo "backport_pr_number=$BACKPORT_PR_NUMBER" >> $GITHUB_OUTPUT
           echo "New PR has been created"
+
+          echo "has-conflicts=false" >> $GITHUB_OUTPUT
+
+          git checkout master
         env:
           TARGET_BRANCH: ${{ steps.get_latest_release_branch.outputs.branch-name }}
           ORIGINAL_PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
@@ -85,10 +96,10 @@ jobs:
         if: ${{ steps.create_backport_pull_request.outputs.has-conflicts == 'true' }}
         with:
           include-log: false
-          message: could not create a backport due to conflicts
+          message: Manual conflict resolution is required
 
       - uses: ./.github/actions/notify-pull-request
         if: ${{ failure() }}
         with:
           include-log: true
-          message: something went wrong while creating a backport
+          message: Something went wrong while creating a backport
