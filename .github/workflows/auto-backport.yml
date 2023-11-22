@@ -43,8 +43,11 @@ jobs:
 
           CONFLICTS=$(git ls-files -u | wc -l)
           if [ "$CONFLICTS" -gt 0 ]; then
+              git cherry-pick --abort
+
               echo "Could not cherry pick because of a conflict"
               echo "has-conflicts=true" >> $GITHUB_OUTPUT
+
               # Add a shell script for resolving conflicts
               echo "git reset HEAD~1" > ./backport.sh
               echo "rm ./backport.sh" >> ./backport.sh
@@ -52,6 +55,7 @@ jobs:
               chmod +x ./backport.sh
               git add ./backport.sh
               git commit -m "Add backport resolution script"
+
               PR_BODY="🤖 backported \"${ORIGINAL_TITLE}\"\n\n[!IMPORTANT]\nManual conflict resolution is required. Checkout the branch and run \`./backport.sh\` script"
           else
               echo "has-conflicts=false" >> $GITHUB_OUTPUT
