@@ -1,4 +1,4 @@
-export const APP_BAR_HEIGHT = "62rem";
+export const APP_BAR_HEIGHT = "64rem";
 export const APP_SUBHEADER_HEIGHT = "48px";
 export const APP_BAR_EXTENDED_HEIGHT = "98px";
 export const ADMIN_NAVBAR_HEIGHT = "65px";
