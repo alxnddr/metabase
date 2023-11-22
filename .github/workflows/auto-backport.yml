@@ -49,18 +49,12 @@ jobs:
             echo "has-conflicts=true" >> $GITHUB_OUTPUT
 
             # Add a shell script for resolving conflicts
-            cat > ./backport.sh <<EOF
-            echo 'Test'
-            git reset HEAD~1
-            rm ./backport.sh
-            git cherry-pick ${COMMIT}
-            echo 'Resolve conflicts and then force-push this branch'
-          EOF
-
+            echo "git reset HEAD~1" > ./backport.sh
+            echo "rm ./backport.sh" >> ./backport.sh
+            echo "git cherry-pick ${COMMIT}" >> ./backport.sh
             chmod +x ./backport.sh
             git add ./backport.sh
             git commit -m "Add backport resolution script"
-
             PR_BODY=$(cat <<-END
             #${ORIGINAL_PULL_REQUEST_NUMBER}
             > [!IMPORTANT]
