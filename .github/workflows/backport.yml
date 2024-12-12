@@ -17,8 +17,13 @@ jobs:
         id: check_pull_request_state
         with:
           script: |
-            const state = "${{github.event.issue.pull_request.state}}";
-            const canBackport = state === "closed"
+            const { data: pullRequest } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.issue.number
+            });
+
+            const canBackport = pullRequest.state === "closed"
             if (!canBackport) {
               await github.rest.issues.createComment({
                 issue_number: context.payload.issue.number,
