@@ -179,6 +179,8 @@ jobs:
               echo "backport_pr_number=$BACKPORT_PR_NUMBER" >> $GITHUB_OUTPUT
               echo "New PR has been created"
           fi
+
+          git checkout master
         env:
           ORIGINAL_TITLE: ${{ fromJson(steps.branch_info.outputs.result).originalPullRequest.title }}
           ORIGINAL_BASE_REF: ${{ fromJson(steps.branch_info.outputs.result).originalPullRequest.base.ref }}
