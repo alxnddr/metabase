@@ -3,4 +3,4 @@ export const USER_STATUS = {
   deactivated: "deactivated",
 };
 
-export const ACTIVE_USERS_NUDGE_THRESHOLD = 50;
+export const ACTIVE_USERS_NUDGE_THRESHOLD = 51;
