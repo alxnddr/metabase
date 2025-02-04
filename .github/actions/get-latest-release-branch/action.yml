@@ -1,0 +1,44 @@
+name: Get latest release branch
+description: "Get the latest release branches based on provided count"
+
+inputs:
+  backport_count:
+    description: "Number of latest release branches to return"
+    required: false
+    default: "1"
+
+outputs:
+  branch-names:
+    description: "JSON array of branch names"
+    value: ${{ steps.get-release-branches.outputs.result }}
+
+runs:
+  using: composite
+  steps:
+    - name: Fetch and filter release branches
+      id: get-release-branches
+      uses: actions/github-script@v7
+      with:
+        result-encoding: string
+        script: |
+          const backportCount = parseInt("${{ inputs.backport_count }}", 10);
+
+          const releaseBranches = await github.rest.git.listMatchingRefs({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            ref: "heads/release-x.",
+          });
+
+          const getVersionFromBranch = branch => {
+            const match = branch.match(/release-x\.(\d+)\.x$/);
+            return match ? parseInt(match[1], 10) : null;
+          };
+
+          const sortedBranches = releaseBranches.data
+            .map(ref => ref.ref.replace("refs/heads/", ""))
+            .filter(branch => getVersionFromBranch(branch) !== null)
+            .sort((a, b) => getVersionFromBranch(b) - getVersionFromBranch(a));
+
+          const targetBranches = sortedBranches.slice(0, backportCount);
+          core.info(`Target branches: ${JSON.stringify(targetBranches)}`);
+          return JSON.stringify(targetBranches);
