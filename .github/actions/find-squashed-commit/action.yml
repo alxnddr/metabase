@@ -15,14 +15,15 @@ runs:
   using: "composite"
   steps:
     - run: |
-        git checkout $BASE_REF
-        git fetch --all
+        echo "commit=050ba9bec4007888d6be11c39c339d97971b33e5" >> $GITHUB_OUTPUT
+        # git checkout $BASE_REF
+        # git fetch --all
 
-        echo "Looking for a commit that contains pull request number $PULL_REQUEST_NUMBER in $BASE_REF"
-        COMMIT=$(env -i git log $BASE_REF --grep="(#$PULL_REQUEST_NUMBER)" --format="%H")
-        echo "commit SHA $COMMIT"
+        # echo "Looking for a commit that contains pull request number $PULL_REQUEST_NUMBER in $BASE_REF"
+        # COMMIT=$(env -i git log $BASE_REF --grep="(#$PULL_REQUEST_NUMBER)" --format="%H")
+        # echo "commit SHA $COMMIT"
 
-        echo "commit=$COMMIT" >> $GITHUB_OUTPUT
+        # echo "commit=$COMMIT" >> $GITHUB_OUTPUT
       id: find-squashed-commit
       shell: bash
       env:
