@@ -1,15 +1,11 @@
 name: Notify Pull Request
 inputs:
   message:
-    description: "Notification message to include in the PR comment"
     required: true
   include-log:
-    description: "Include a link to the run logs"
     required: false
     default: true
-  pr_number:
-    description: "The pull request number to comment on"
-    required: true
+
 runs:
   using: composite
   steps:
@@ -18,23 +14,22 @@ runs:
       with:
         result-encoding: string
         script: |
-          const message = "${{ inputs.message }}";
-          const shouldIncludeLog = ("${{ inputs.include-log }}" === "true");
+          const message = "${{ inputs.message }}"
+          const shouldIncludeLog = ${{ inputs.include-log }}.toString() === "true";
+          const author = context.payload.sender.login;
 
-          const prNumber = "${{ inputs.pr_number }}";
-          if (!prNumber) {
-            throw new Error("No pull request number provided.");
-          }
-          const author = (context.payload.sender && context.payload.sender.login) || "";
           let body = `@${author} ${message}`;
+
           if (shouldIncludeLog) {
             const { GITHUB_SERVER_URL, GITHUB_REPOSITORY, GITHUB_RUN_ID } = process.env;
             const runUrl = `${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}`;
             body += ` [[Logs]](${runUrl})`;
           }
 
-          await github.rest.issues.createComment({
-            issue_number: parseInt(prNumber, 10),
+          console.log('>>>>context.payload', JSON.stringifycontext.payload)
+          console.log('>>context.payload', JSON.stringify(context.payload))
+          github.rest.issues.createComment({
+            issue_number: context.payload.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
             body,
