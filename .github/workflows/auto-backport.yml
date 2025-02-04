@@ -4,106 +4,169 @@ on:
     types: [closed, labeled]
 
 jobs:
-  create-backport:
-    if: github.event.pull_request.merged == true && (contains(github.event.pull_request.labels.*.name, 'backport') && github.event.action == 'closed' || github.event.label.name == 'backport')
-    runs-on: ubuntu-22.04
+  prepare:
+    if: >
+      github.event.pull_request.merged == true &&
+      (
+        (github.event.action == 'closed' &&
+          contains(join(github.event.pull_request.labels.*.name, ','), 'backport')) ||
+        (github.event.action == 'labeled' &&
+          startsWith(github.event.label.name, 'backport'))
+      )
+    runs-on: ubuntu-latest
+    outputs:
+      branches: ${{ steps.set-branches.outputs.branches }}
+      commit: ${{ steps.set-additional.outputs.commit }}
+      pr_number: ${{ steps.set-additional.outputs.pr_number }}
+      pr_title: ${{ steps.set-additional.outputs.pr_title }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.METABASE_AUTOMATION_USER_TOKEN }}
-      - uses: ./.github/actions/find-squashed-commit
-        name: Find commit
+
+      - name: Find squashed commit
         id: find_commit
+        uses: ./.github/actions/find-squashed-commit
         with:
           pull-request-number: ${{ github.event.pull_request.number }}
           base-ref: ${{ github.event.pull_request.base.ref }}
 
-      - uses: ./.github/actions/get-latest-release-branch
-        name: Get latest release branch
-        id: get_latest_release_branch
+      - name: Determine backport count from label
+        id: determine_backport_count
+        uses: actions/github-script@v7
+        with:
+          script: |
+            let count = 1;
+            const labels = context.payload.pull_request
+              ? context.payload.pull_request.labels
+              : [context.payload.label];
+            for (const label of labels) {
+              if (label && label.name) {
+                const match = label.name.match(/^backport(?:-(\d+))?$/);
+                if (match) {
+                  count = match[1] ? parseInt(match[1], 10) : 1;
+                  break;
+                }
+              }
+            }
+            core.info(`Backport count: ${count}`);
+            return count;
+          result-encoding: string
 
-      - id: create_backport_pull_request
-        name: Create backport pull request
+      - name: Get target release branches
+        id: get_target_release_branches
+        uses: ./.github/actions/get-latest-release-branch
+        with:
+          backport_count: ${{ steps.determine_backport_count.outputs.result }}
+
+      - name: Set branches output
+        id: set-branches
+        run: |
+          echo "branches=${{ steps.get_target_release_branches.outputs.branch-names }}" >> "$GITHUB_OUTPUT"
+          echo "Branches from get-latest-release-branch: ${{ steps.get_target_release_branches.outputs.branch-names }}"
+
+      - name: Set additional outputs
+        id: set-additional
+        run: |
+          echo "commit=${{ steps.find_commit.outputs.commit }}" >> "$GITHUB_OUTPUT"
+          echo "pr_number=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+          echo "pr_title=${{ github.event.pull_request.title }}" >> "$GITHUB_OUTPUT"
+
+  create-backport:
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        branch: ${{ fromJson(needs.prepare.outputs.branches || '[]') }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.METABASE_AUTOMATION_USER_TOKEN }}
+
+      - name: Configure Git
         run: |
           git config --global user.email "metabase-bot@metabase.com"
           git config --global user.name "Metabase bot"
 
-          BACKPORT_BRANCH="backport-$COMMIT"
+      - name: Create backport branch and cherry-pick commit
+        id: create_backport
+        run: |
+          TARGET_BRANCH="${{ matrix.branch }}"
+          COMMIT="${{ needs.prepare.outputs.commit }}"
+          ORIGINAL_PULL_REQUEST_NUMBER="${{ needs.prepare.outputs.pr_number }}"
+          ORIGINAL_TITLE="${{ needs.prepare.outputs.pr_title }}"
+          BACKPORT_BRANCH="backport-${TARGET_BRANCH}-${COMMIT}"
 
-          # Checkout the target branch and create a new backport branch
+          echo "Checking out target branch: ${TARGET_BRANCH}"
           git checkout ${TARGET_BRANCH}
           git fetch --all
           git checkout -b ${BACKPORT_BRANCH}
+
+          echo "Cherry-picking commit ${COMMIT}"
           git cherry-pick ${COMMIT} || true
 
           CONFLICTS=$(git ls-files -u | wc -l)
           if [ "$CONFLICTS" -gt 0 ]; then
+            echo "Conflicts detected on branch ${TARGET_BRANCH}. Aborting cherry-pick."
             git cherry-pick --abort
+            echo "has-conflicts=true" >> "$GITHUB_OUTPUT"
 
-            echo "Could not cherry pick because of a conflict"
-            echo "has-conflicts=true" >> $GITHUB_OUTPUT
-
-            # Add a shell script for resolving conflicts
             echo "git reset HEAD~1" > ./backport.sh
             echo "rm ./backport.sh" >> ./backport.sh
             echo "git cherry-pick ${COMMIT}" >> ./backport.sh
             echo "echo 'Resolve conflicts and force push this branch'" >> ./backport.sh
             chmod +x ./backport.sh
             git add ./backport.sh
-            git commit -m "Add backport resolution script"
+            git commit -m "Add backport resolution script for branch ${TARGET_BRANCH}"
 
             PR_BODY=$(cat <<-END
-            #${ORIGINAL_PULL_REQUEST_NUMBER}
-            > [!IMPORTANT]
-            > Manual conflict resolution is required.
-            Checkout the branch and run \`./backport.sh\` script. Force push your changes after cherry-picking.
-          END
+              #${ORIGINAL_PULL_REQUEST_NUMBER}
+              > [!IMPORTANT]
+              > Manual conflict resolution is required for branch ${TARGET_BRANCH}.
+              > Checkout the branch and run \`./backport.sh\` to continue. Then force‑push your changes.
+            END
             )
           else
-            echo "has-conflicts=false" >> $GITHUB_OUTPUT
+            echo "has-conflicts=false" >> "$GITHUB_OUTPUT"
             PR_BODY="#${ORIGINAL_PULL_REQUEST_NUMBER}"
           fi
 
           git push -u origin ${BACKPORT_BRANCH}
 
-          BACKPORT_PR_URL=$(gh pr create --base "${TARGET_BRANCH}" --head "${BACKPORT_BRANCH}" --label "was-backported" --assignee "${GITHUB_ACTOR}" --title "🤖 backported \"${ORIGINAL_TITLE}\"" --body "${PR_BODY}")
+          BACKPORT_PR_URL=$(gh pr create \
+            --base "${TARGET_BRANCH}" \
+            --head "${BACKPORT_BRANCH}" \
+            --label "was-backported" \
+            --assignee "${{ github.actor }}" \
+            --title "🤖 backported \"${ORIGINAL_TITLE}\" to ${TARGET_BRANCH}" \
+            --body "${PR_BODY}")
           BACKPORT_PR_NUMBER=${BACKPORT_PR_URL##*/}
 
-          echo "backport_pr_number=$BACKPORT_PR_NUMBER" >> $GITHUB_OUTPUT
-          echo "New PR has been created"
-
-          git checkout master
-        env:
-          TARGET_BRANCH: ${{ steps.get_latest_release_branch.outputs.branch-name }}
-          ORIGINAL_PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
-          ORIGINAL_TITLE: ${{ github.event.pull_request.title }}
-          GITHUB_TOKEN: ${{ secrets.METABASE_AUTOMATION_USER_TOKEN }}
-          COMMIT: ${{ steps.find_commit.outputs.commit }}
+          echo "Backport PR created: ${BACKPORT_PR_URL}"
+          echo "backport_pr_number=${BACKPORT_PR_NUMBER}" >> "$GITHUB_OUTPUT"
 
       - name: Auto approve backport PR
-        if: ${{ steps.create_backport_pull_request.outputs.has-conflicts == 'false' }}
+        if: steps.create_backport.outputs.has-conflicts == 'false'
         uses: juliangruber/approve-pull-request-action@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          number: ${{ steps.create_backport_pull_request.outputs.backport_pr_number }}
+          number: ${{ steps.create_backport.outputs.backport_pr_number }}
 
       - name: Enable Pull Request Automerge
-        if: ${{ steps.create_backport_pull_request.outputs.has-conflicts == 'false' }}
+        if: steps.create_backport.outputs.has-conflicts == 'false'
         uses: peter-evans/enable-pull-request-automerge@v2
         with:
           token: ${{ secrets.METABASE_AUTOMATION_USER_TOKEN }}
-          pull-request-number: ${{ steps.create_backport_pull_request.outputs.backport_pr_number }}
+          pull-request-number: ${{ steps.create_backport.outputs.backport_pr_number }}
           merge-method: squash
 
-      - uses: ./.github/actions/notify-pull-request
-        if: ${{ steps.create_backport_pull_request.outputs.has-conflicts == 'true' }}
+      - name: Notify about manual conflict resolution
+        if: steps.create_backport.outputs.has-conflicts == 'true'
+        uses: ./.github/actions/notify-pull-request
         with:
           include-log: false
-          message: Manual conflict resolution is required
-
-      - uses: ./.github/actions/notify-pull-request
-        if: ${{ failure() }}
-        with:
-          include-log: true
-          message: Something went wrong while creating a backport
+          message: "Manual conflict resolution is required for branch ${{ matrix.branch }}"

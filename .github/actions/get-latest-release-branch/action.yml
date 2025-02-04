@@ -1,41 +1,49 @@
 name: Get latest release branch
+description: "Get the latest release branches based on the provided count"
+
+inputs:
+  backport_count:
+    description: "Number of latest release branches to return"
+    required: false
+    default: "1"
 
 outputs:
-  branch-name:
-    value: ${{ steps.get-latest-release-branch.outputs.result }}
+  branch-names:
+    description: "JSON array of branch names"
+    value: ${{ steps.get-release-branches.outputs.result }}
 
 runs:
   using: "composite"
   steps:
-    - uses: actions/github-script@v7
-      id: get-latest-release-branch
+    - name: Fetch and filter release branches
+      id: get-release-branches
+      uses: actions/github-script@v7
       with:
         result-encoding: string
         script: |
+          const backportCount = parseInt("${{ inputs.backport_count }}", 10);
+
+          // List all branches starting with "release-x."
           const releaseBranches = await github.rest.git.listMatchingRefs({
             owner: context.repo.owner,
             repo: context.repo.repo,
             ref: "heads/release-x.",
           });
 
+          // Extract the version number from a branch name like "release-x.51.x"
           const getVersionFromBranch = branch => {
-            const match = branch.match(/release-x\.(.*?)\.x$/);
-            return match && parseInt(match[1]);
+            const match = branch.match(/release-x\.(\d+)\.x$/);
+            return match ? parseInt(match[1], 10) : null;
           };
-          const latestReleaseBranch = releaseBranches.data
-            .filter(branch => getVersionFromBranch(branch.ref) !== null)
-            .reduce(
-              (prev, current) =>
-                getVersionFromBranch(prev.ref) > getVersionFromBranch(current.ref)
-                  ? prev
-                  : current,
-              { ref: "" },
-            );
-          const latestReleaseBranchName = latestReleaseBranch.ref.replace(
-            /^refs\/heads\//,
-            "",
-          );
 
-          console.log(`Latest release branch: ${latestReleaseBranchName}`);
+          // Filter and sort branches descending (latest first)
+          const sortedBranches = releaseBranches.data
+            .map(ref => ref.ref.replace("refs/heads/", ""))
+            .filter(branch => getVersionFromBranch(branch) !== null)
+            .sort((a, b) => getVersionFromBranch(b) - getVersionFromBranch(a));
 
-          return latestReleaseBranchName;
+          // Take the top N branches
+          const targetBranches = sortedBranches.slice(0, backportCount);
+          core.info(`Target branches: ${JSON.stringify(targetBranches)}`);
+
+          return JSON.stringify(targetBranches)
