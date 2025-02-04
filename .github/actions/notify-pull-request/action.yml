@@ -1,37 +1,32 @@
 name: Notify Pull Request
 inputs:
   message:
+    description: "Notification message to include in the PR comment"
     required: true
   include-log:
+    description: "Include a link to the run logs"
     required: false
     default: true
   pr_number:
-    description: "Pull request number to comment on"
+    description: "The pull request number to comment on"
     required: true
 runs:
-  using: "composite"
+  using: composite
   steps:
     - uses: actions/github-script@v7
       id: notify
       with:
         result-encoding: string
         script: |
-          const message = "${{ inputs.message }}"
-          const shouldIncludeLog = ${{ inputs.include-log }}.toString() === "true";
+          const message = "${{ inputs.message }}";
+          const shouldIncludeLog = ("${{ inputs.include-log }}" === "true");
+
           const prNumber = "${{ inputs.pr_number }}";
           if (!prNumber) {
             throw new Error("No pull request number provided.");
           }
-          // Optionally, determine an author (if needed) from context.payload.sender;
-          // if context.payload is not available, you might default to a known value or pass it as an input.
-          const author = context.payload.sender && context.payload.sender.login;
-
-          let body = ``;
-          if (author != null) {
-            body += `@${author} `;
-          }
-
-          body += `${message}
+          const author = (context.payload.sender && context.payload.sender.login) || "";
+          let body = `@${author} ${message}`;
           if (shouldIncludeLog) {
             const { GITHUB_SERVER_URL, GITHUB_REPOSITORY, GITHUB_RUN_ID } = process.env;
             const runUrl = `${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}`;

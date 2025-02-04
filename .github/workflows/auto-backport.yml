@@ -153,9 +153,8 @@ jobs:
           pull-request-number: ${{ steps.create_backport.outputs.backport_pr_number }}
           merge-method: squash
 
-      - name: Notify about manual conflict resolution
-        if: steps.create_backport.outputs.has-conflicts == 'true'
-        uses: ./.github/actions/notify-pull-request
+      - uses: ./.github/actions/notify-pull-request
+        if: ${{ steps.create_backport.outputs.has-conflicts == 'true' }}
         with:
           pr_number: ${{ needs.prepare.outputs.pr_number }}
           include-log: false
