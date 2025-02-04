@@ -157,11 +157,6 @@ jobs:
         if: steps.create_backport.outputs.has-conflicts == 'true'
         uses: ./.github/actions/notify-pull-request
         with:
+          pr_number: ${{ needs.prepare.outputs.pr_number }}
           include-log: false
           message: "Manual conflict resolution is required for branch ${{ matrix.branch }}"
-
-      - uses: ./.github/actions/notify-pull-request
-        if: ${{ failure() }}
-        with:
-          include-log: true
-          message: Something went wrong while creating a backport

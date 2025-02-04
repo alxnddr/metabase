@@ -5,7 +5,9 @@ inputs:
   include-log:
     required: false
     default: true
-
+  pr_number:
+    description: "Pull request number to comment on"
+    required: true
 runs:
   using: "composite"
   steps:
@@ -16,24 +18,28 @@ runs:
         script: |
           const message = "${{ inputs.message }}"
           const shouldIncludeLog = ${{ inputs.include-log }}.toString() === "true";
-          const author = context.payload.sender.login;
+          const prNumber = "${{ inputs.pr_number }}";
+          if (!prNumber) {
+            throw new Error("No pull request number provided.");
+          }
+          // Optionally, determine an author (if needed) from context.payload.sender;
+          // if context.payload is not available, you might default to a known value or pass it as an input.
+          const author = context.payload.sender && context.payload.sender.login;
 
-          const issueNumber = (context.payload.issue && context.payload.issue.number) ||
-                              (context.payload.pull_request && context.payload.pull_request.number);
-          if (!issueNumber) {
-            throw new Error("No issue or pull_request number found in context.payload");
+          let body = ``;
+          if (author != null) {
+            body += `@${author} `;
           }
 
-          let body = `@${author} ${message}`;
-
+          body += `${message}
           if (shouldIncludeLog) {
             const { GITHUB_SERVER_URL, GITHUB_REPOSITORY, GITHUB_RUN_ID } = process.env;
             const runUrl = `${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}`;
             body += ` [[Logs]](${runUrl})`;
           }
 
-          github.rest.issues.createComment({
-            issue_number: issueNumber,
+          await github.rest.issues.createComment({
+            issue_number: parseInt(prNumber, 10),
             owner: context.repo.owner,
             repo: context.repo.repo,
             body,
