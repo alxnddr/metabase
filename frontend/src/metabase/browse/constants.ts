@@ -1,1 +1,1 @@
-export const RELOAD_INTERVAL = 2001;
+export const RELOAD_INTERVAL = 2002;
