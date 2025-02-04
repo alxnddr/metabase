@@ -6,11 +6,8 @@ on:
 jobs:
   prepare:
     if: >
-      github.event.pull_request.merged == true &&
-      (
-        (contains(github.event.pull_request.labels.*.name, 'backport') && github.event.action == 'closed') || (github.event.label.name && contains(github.event.label.name, 'backport'))
-      )
-    runs-on: ubuntu-22.04
+      github.event.pull_request.merged == true && (contains(github.event.pull_request.labels.*.name, 'backport') && github.event.action == 'closed') || (github.event.label.name && contains(github.event.label.name, 'backport'))
+    runs-on: ubuntu-latest
     outputs:
       branches: ${{ steps.set-branches.outputs.branches }}
       commit: ${{ steps.set-additional.outputs.commit }}
@@ -24,8 +21,8 @@ jobs:
           token: ${{ secrets.METABASE_AUTOMATION_USER_TOKEN }}
 
       - name: Find squashed commit
-        uses: ./.github/actions/find-squashed-commit
         id: find_commit
+        uses: ./.github/actions/find-squashed-commit
         with:
           pull-request-number: ${{ github.event.pull_request.number }}
           base-ref: ${{ github.event.pull_request.base.ref }}
@@ -35,7 +32,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            // Look through the pull_request labels (or in case of a “labeled” event, the single label)
+            // Default to 1 backport if label is "backport"
             let count = 1;
             const labels = context.payload.pull_request
               ? context.payload.pull_request.labels
@@ -62,19 +59,19 @@ jobs:
       - name: Set branches output
         id: set-branches
         run: |
+          echo "branches=${{ steps.get_target_release_branches.outputs.branch-names }}" >> $GITHUB_OUTPUT
           echo "Branches from get-latest-release-branch: ${{ steps.get_target_release_branches.outputs.branch-names }}"
-          echo "::set-output name=branches::${{ steps.get_target_release_branches.outputs.branch-names }}"
 
       - name: Set additional outputs
         id: set-additional
         run: |
-          echo "::set-output name=commit::${{ steps.find_commit.outputs.commit }}"
-          echo "::set-output name=pr_number::${{ github.event.pull_request.number }}"
-          echo "::set-output name=pr_title::${{ github.event.pull_request.title }}"
+          echo "commit=${{ steps.find_commit.outputs.commit }}" >> $GITHUB_OUTPUT
+          echo "pr_number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+          echo "pr_title=${{ github.event.pull_request.title }}" >> $GITHUB_OUTPUT
 
   create-backport:
     needs: prepare
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         branch: ${{ fromJson(needs.prepare.outputs.branches) }}
@@ -93,13 +90,10 @@ jobs:
       - name: Create backport branch and cherry-pick commit
         id: create_backport
         run: |
-          # The current target branch from the matrix:
           TARGET_BRANCH="${{ matrix.branch }}"
-          # Common values passed down from the prepare job:
           COMMIT="${{ needs.prepare.outputs.commit }}"
           ORIGINAL_PULL_REQUEST_NUMBER="${{ needs.prepare.outputs.pr_number }}"
           ORIGINAL_TITLE="${{ needs.prepare.outputs.pr_title }}"
-          # Create a unique backport branch name (including target branch and commit SHA)
           BACKPORT_BRANCH="backport-${TARGET_BRANCH}-${COMMIT}"
 
           echo "Checking out target branch: ${TARGET_BRANCH}"
@@ -110,14 +104,14 @@ jobs:
           echo "Cherry-picking commit ${COMMIT}"
           git cherry-pick ${COMMIT} || true
 
-          # Detect any conflicts (if any files are unmerged, git ls-files -u returns nonzero count)
+          # Detect conflicts
           CONFLICTS=$(git ls-files -u | wc -l)
           if [ "$CONFLICTS" -gt 0 ]; then
             echo "Conflicts detected on branch ${TARGET_BRANCH}. Aborting cherry-pick."
             git cherry-pick --abort
             echo "has-conflicts=true" >> $GITHUB_OUTPUT
 
-            # Create a helper resolution script so that someone can resolve manually.
+            # Create a helper script for manual resolution
             echo "git reset HEAD~1" > ./backport.sh
             echo "rm ./backport.sh" >> ./backport.sh
             echo "git cherry-pick ${COMMIT}" >> ./backport.sh
@@ -138,10 +132,9 @@ jobs:
             PR_BODY="#${ORIGINAL_PULL_REQUEST_NUMBER}"
           fi
 
-          # Push the new backport branch to origin.
           git push -u origin ${BACKPORT_BRANCH}
 
-          # Create the backport pull request.
+          # Create the backport pull request
           BACKPORT_PR_URL=$(gh pr create \
             --base "${TARGET_BRANCH}" \
             --head "${BACKPORT_BRANCH}" \
