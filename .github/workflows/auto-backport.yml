@@ -9,7 +9,7 @@ jobs:
       github.event.action == 'labeled' && startsWith(github.event.label.name, 'backport')
     runs-on: ubuntu-latest
     outputs:
-      branches: ${{ steps.set-branches.outputs.branches }}
+      branches: ${{ steps.get_target_release_branches.outputs.branch-names }}
       commit: ${{ steps.set-additional.outputs.commit }}
       pr_number: ${{ steps.set-additional.outputs.pr_number }}
       pr_title: ${{ steps.set-additional.outputs.pr_title }}
@@ -54,12 +54,6 @@ jobs:
         uses: ./.github/actions/get-latest-release-branch
         with:
           backport_count: ${{ steps.determine_backport_count.outputs.result }}
-
-      - name: Set branches output
-        id: set-branches
-        run: |
-          echo "branches=${{ steps.get_target_release_branches.outputs.branch-names }}" >> "$GITHUB_OUTPUT"
-          echo "Branches from get-latest-release-branch: ${{ steps.get_target_release_branches.outputs.branch-names }}"
 
       - name: Set additional outputs
         id: set-additional
