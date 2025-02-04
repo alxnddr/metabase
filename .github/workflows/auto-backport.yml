@@ -6,8 +6,14 @@ on:
 jobs:
   prepare:
     if: >
-      github.event.pull_request.merged == true && (contains(github.event.pull_request.labels.*.name, 'backport') && github.event.action == 'closed') || (github.event.label.name && contains(github.event.label.name, 'backport'))
-    runs-on: ubuntu-latest
+      github.event.pull_request.merged == true &&
+      (
+        (github.event.action == 'closed' &&
+          contains(join(github.event.pull_request.labels.*.name, ','), 'backport')) ||
+        (github.event.action == 'labeled' &&
+          startsWith(github.event.label.name, 'backport'))
+      )
+    runs-on: ubuntu-22.04
     outputs:
       branches: ${{ steps.set-branches.outputs.branches }}
       commit: ${{ steps.set-additional.outputs.commit }}
@@ -32,7 +38,6 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            // Default to 1 backport if label is "backport"
             let count = 1;
             const labels = context.payload.pull_request
               ? context.payload.pull_request.labels
@@ -59,22 +64,22 @@ jobs:
       - name: Set branches output
         id: set-branches
         run: |
-          echo "branches=${{ steps.get_target_release_branches.outputs.branch-names }}" >> $GITHUB_OUTPUT
+          echo "branches=${{ steps.get_target_release_branches.outputs.branch-names }}" >> "$GITHUB_OUTPUT"
           echo "Branches from get-latest-release-branch: ${{ steps.get_target_release_branches.outputs.branch-names }}"
 
       - name: Set additional outputs
         id: set-additional
         run: |
-          echo "commit=${{ steps.find_commit.outputs.commit }}" >> $GITHUB_OUTPUT
-          echo "pr_number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
-          echo "pr_title=${{ github.event.pull_request.title }}" >> $GITHUB_OUTPUT
+          echo "commit=${{ steps.find_commit.outputs.commit }}" >> "$GITHUB_OUTPUT"
+          echo "pr_number=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+          echo "pr_title=${{ github.event.pull_request.title }}" >> "$GITHUB_OUTPUT"
 
   create-backport:
     needs: prepare
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        branch: ${{ fromJson(needs.prepare.outputs.branches) }}
+        branch: ${{ fromJson(needs.prepare.outputs.branches || '[]') }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -109,7 +114,7 @@ jobs:
           if [ "$CONFLICTS" -gt 0 ]; then
             echo "Conflicts detected on branch ${TARGET_BRANCH}. Aborting cherry-pick."
             git cherry-pick --abort
-            echo "has-conflicts=true" >> $GITHUB_OUTPUT
+            echo "has-conflicts=true" >> "$GITHUB_OUTPUT"
 
             # Create a helper script for manual resolution
             echo "git reset HEAD~1" > ./backport.sh
@@ -128,13 +133,12 @@ jobs:
             END
             )
           else
-            echo "has-conflicts=false" >> $GITHUB_OUTPUT
+            echo "has-conflicts=false" >> "$GITHUB_OUTPUT"
             PR_BODY="#${ORIGINAL_PULL_REQUEST_NUMBER}"
           fi
 
           git push -u origin ${BACKPORT_BRANCH}
 
-          # Create the backport pull request
           BACKPORT_PR_URL=$(gh pr create \
             --base "${TARGET_BRANCH}" \
             --head "${BACKPORT_BRANCH}" \
@@ -145,7 +149,7 @@ jobs:
           BACKPORT_PR_NUMBER=${BACKPORT_PR_URL##*/}
 
           echo "Backport PR created: ${BACKPORT_PR_URL}"
-          echo "backport_pr_number=${BACKPORT_PR_NUMBER}" >> $GITHUB_OUTPUT
+          echo "backport_pr_number=${BACKPORT_PR_NUMBER}" >> "$GITHUB_OUTPUT"
 
       - name: Auto approve backport PR
         if: steps.create_backport.outputs.has-conflicts == 'false'

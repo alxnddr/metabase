@@ -10,40 +10,32 @@ inputs:
 outputs:
   branch-names:
     description: "JSON array of branch names"
-    value: ${{ steps.get-release-branches.outputs.result }}
+    value: ${{ steps.get_release_branches.outputs.result }}
 
 runs:
   using: "composite"
   steps:
     - name: Fetch and filter release branches
-      id: get-release-branches
-      uses: actions/github-script@v7
-      with:
-        result-encoding: string
-        script: |
-          const backportCount = parseInt("${{ inputs.backport_count }}", 10);
+      id: get_release_branches
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ secrets.METABASE_AUTOMATION_USER_TOKEN }}
+        BACKPORT_COUNT: ${{ inputs.backport_count }}
+        OWNER: ${{ github.repository_owner }}
+        REPO: ${{ github.event.repository.name }}
+      run: |
+        # Fetch branches whose ref starts with "release-x."
+        branches_json=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+          "https://api.github.com/repos/${OWNER}/${REPO}/git/matching-refs/heads/release-x.")
 
-          // List all branches starting with "release-x."
-          const releaseBranches = await github.rest.git.listMatchingRefs({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            ref: "heads/release-x.",
-          });
+        # Extract branch names from the JSON (removing the "refs/heads/" prefix)
+        branches=$(echo "$branches_json" | jq -r '.[].ref' | sed 's|refs/heads/||' | grep -E '^release-x\.[0-9]+\.x$')
 
-          // Extract the version number from a branch name like "release-x.51.x"
-          const getVersionFromBranch = branch => {
-            const match = branch.match(/release-x\.(\d+)\.x$/);
-            return match ? parseInt(match[1], 10) : null;
-          };
+        # Sort branches in descending order by the numeric part (for example, "release-x.56.x" before "release-x.55.x")
+        sorted_branches=$(echo "$branches" | sort -r -t '.' -k2,2n)
 
-          // Filter and sort branches descending (latest first)
-          const sortedBranches = releaseBranches.data
-            .map(ref => ref.ref.replace("refs/heads/", ""))
-            .filter(branch => getVersionFromBranch(branch) !== null)
-            .sort((a, b) => getVersionFromBranch(b) - getVersionFromBranch(a));
+        # Select the top N branches (N is BACKPORT_COUNT)
+        top_branches=$(echo "$sorted_branches" | head -n "$BACKPORT_COUNT" | jq -R -s -c 'split("\n") | map(select(length > 0))')
 
-          // Take the top N branches
-          const targetBranches = sortedBranches.slice(0, backportCount);
-          core.info(`Target branches: ${JSON.stringify(targetBranches)}`);
-
-          core.setOutput("result", JSON.stringify(targetBranches));
+        echo "Target branches: $top_branches"
+        echo "result=$top_branches" >> "$GITHUB_OUTPUT"
