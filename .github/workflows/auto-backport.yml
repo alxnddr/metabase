@@ -135,7 +135,7 @@ jobs:
           echo "backport_pr_number=$BACKPORT_PR_NUMBER" >> $GITHUB_OUTPUT
           echo "New PR has been created"
 
-          git checkout master
+          git checkout sample-change
         env:
           GITHUB_TOKEN: ${{ secrets.METABASE_AUTOMATION_USER_TOKEN }}
       - name: Auto approve backport PR
@@ -157,4 +157,5 @@ jobs:
         if: ${{ steps.create_backport.outputs.has-conflicts == 'true' }}
         with:
           include-log: false
+          pr_number: ${{ needs.prepare.outputs.pr_number }}
           message: "Manual conflict resolution is required for branch ${{ matrix.branch }}"
