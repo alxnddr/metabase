@@ -8,6 +8,7 @@ import type { Dispatch, GetState } from "metabase-types/store";
 import { getQuestion } from "../selectors";
 
 import { apiUpdateQuestion, updateQuestion } from "./core";
+import { updateUrl } from "./navigation";
 import { runDirtyQuestionQuery } from "./querying";
 import { setQueryBuilderMode } from "./ui";
 
@@ -37,6 +38,9 @@ export const turnQuestionIntoModel =
       .setSettings({});
     await dispatch(apiUpdateQuestion(model, { rerunQuery: true }));
 
+    // Update the URL with replaceState: true to ensure back button works correctly
+    dispatch(updateUrl(model, { replaceState: true }));
+
     dispatch(
       addUndo({
         message: t`This is a model now.`,
@@ -54,6 +58,9 @@ export const turnModelIntoQuestion =
 
     const question = model.setType("question");
     await dispatch(apiUpdateQuestion(question, { rerunQuery: true }));
+
+    // Update the URL with replaceState: true to ensure back button works correctly
+    dispatch(updateUrl(question, { replaceState: true }));
 
     dispatch(
       addUndo({
