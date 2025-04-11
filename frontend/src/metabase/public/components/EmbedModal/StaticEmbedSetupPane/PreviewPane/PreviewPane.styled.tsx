@@ -13,6 +13,7 @@ export const PreviewPaneContainer = styled.div<{
 }>`
   width: 100%;
   min-height: 17.5rem;
+  max-width: 100%; /* Ensure it doesn't exceed its container */
 
   ${({ hidden }) =>
     hidden &&
@@ -38,4 +39,8 @@ export const PreviewPaneContainer = styled.div<{
       })
       .with("no-background", () => null)
       .exhaustive()};
+
+  iframe {
+    max-width: 100%; /* Ensure iframe respects container bounds */
+  }
 `;

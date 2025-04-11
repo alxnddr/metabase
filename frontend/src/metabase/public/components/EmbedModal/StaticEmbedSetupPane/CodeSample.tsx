@@ -43,10 +43,10 @@ export const CodeSample = ({
   );
 
   return (
-    <div className={className} data-testid={dataTestId}>
+    <div className={cx(className, CS.wFull)} data-testid={dataTestId}>
       {(title || languageOptions.length > 1) && (
-        <div className={cx(CS.flex, CS.alignCenter)}>
-          {title && <h4>{title}</h4>}
+        <div className={cx(CS.flex, CS.alignCenter, CS.wFull)}>
+          {title && <h4 className={CS.flexShrink1}>{title}</h4>}
           {languageOptions.length > 1 ? (
             <Select
               className={CS.mlAuto}
@@ -75,6 +75,7 @@ export const CodeSample = ({
           CS.relative,
           CS.mt2,
           CS.overflowHidden,
+          CS.wFull,
         )}
       >
         <CodeBlock

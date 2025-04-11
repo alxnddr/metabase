@@ -4,6 +4,14 @@
       background-color: var(--mb-color-brand-light);
       color: var(--mb-color-brand);
     }
+    
+    .cm-editor {
+      max-width: 100%;
+    }
+    
+    .cm-scroller {
+      overflow-x: auto !important;
+    }
   }
 }
 
