@@ -27,6 +27,7 @@ import {
 } from "../selectors";
 
 import { updateUrl } from "./navigation";
+import { RESET_ROW_ZOOM } from "./object-detail";
 
 export const SET_DOCUMENT_TITLE = "metabase/qb/SET_DOCUMENT_TITLE";
 const setDocumentTitle = createAction(SET_DOCUMENT_TITLE);
@@ -202,6 +203,16 @@ export const queryCompleted = (question: Question, queryResults: Dataset[]) => {
     const { isEditable } = Lib.queryDisplayInfo(question.query());
     const isDirty = isEditable && question.isDirtyComparedTo(originalQuestion);
 
+    // Check if we're in object detail view and should reset the zoom
+    const { zoomedRowObjectId, queryResults: previousResults } = getState().qb;
+    const isObjectDetail = zoomedRowObjectId !== null;
+
+    // If we're in object detail view and the result count has changed,
+    // this indicates the filter conditions changed, so we should reset the zoom
+    const shouldResetObjectDetailZoom =
+      isObjectDetail &&
+      previousResults?.[0]?.data?.rows?.length !== data?.rows?.length;
+
     if (isDirty) {
       const series = [{ card: question.card(), data, error }];
       const previousSeries =
@@ -235,6 +246,12 @@ export const queryCompleted = (question: Question, queryResults: Dataset[]) => {
         queryResults,
       },
     });
+
+    // Reset the object detail zoom if necessary
+    if (shouldResetObjectDetailZoom) {
+      dispatch({ type: RESET_ROW_ZOOM });
+    }
+
     dispatch(loadCompleteUIControls());
   };
 };
