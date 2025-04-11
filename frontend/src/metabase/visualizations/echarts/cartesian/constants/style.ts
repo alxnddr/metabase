@@ -18,7 +18,7 @@ export const Z_INDEXES = {
 
 export const CHART_STYLE = {
   series: {
-    barWidth: 0.8,
+    barWidth: 0.56, // Reduced by 30% from original 0.8 for better visual separation
     histogramBarWidth: 0.995,
   },
   axisTicksMarginX: 5,
