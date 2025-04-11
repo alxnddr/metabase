@@ -12,7 +12,7 @@ interface ButtonRootProps {
 }
 
 export const ButtonRoot = styled.button<ButtonRootProps>`
-  transition: all 200ms linear;
+  transition: all 300ms linear;
   flex-shrink: 0;
 
   @media (prefers-reduced-motion) {

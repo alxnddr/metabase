@@ -1,10 +1,11 @@
 .FilterButton {
   &[data-variant="default"] {
-    transition: background 300ms linear;
+    transition: all 300ms linear;
 
     &:hover {
       color: var(--mb-color-filter);
       background-color: color-mix(in srgb, var(--mb-color-filter) 10%, white);
+      border-color: color-mix(in srgb, var(--mb-color-filter) 40%, white);
     }
   }
 }
@@ -12,10 +13,11 @@
 .FilterButtonAttachment {
   &[data-variant="default"] {
     padding: 0.5rem;
-    transition: background 300ms linear;
+    transition: all 300ms linear;
 
     &:hover {
       background-color: color-mix(in srgb, var(--mb-color-filter) 10%, white);
+      border-color: color-mix(in srgb, var(--mb-color-filter) 40%, white);
     }
 
     &:hover,
@@ -38,9 +40,7 @@
 }
 
 .SummarizeButton {
-  transition:
-    background 300ms linear,
-    border 300ms linear;
+  transition: all 300ms linear;
 
   &:hover:not([data-active="true"]) {
     color: var(--mb-color-summarize);

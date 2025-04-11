@@ -7,6 +7,7 @@
   overflow: hidden;
   line-height: 1.15; /* mimic line-height ratio from mantine v6 */
   font-size: var(--mantine-font-size-md);
+  transition: all 300ms linear;
 
   &:active {
     transform: none; /* Remove Mantine's default pressed effect */
@@ -47,14 +48,18 @@
     color: var(--mb-color-text-primary);
     border-color: var(--mb-color-border);
     background-color: var(--mb-color-background);
+    transition: all 300ms linear;
 
     &:hover {
       color: var(--mb-color-text-hover);
       background-color: var(--mb-color-background-hover);
+      border-color: alpha(var(--mb-color-border), 0.88);
     }
   }
 
   &[data-variant="filled"] {
+    transition: all 300ms linear;
+
     &:hover {
       border-color: alpha(var(--button-bg), 0.88);
       background-color: alpha(var(--button-bg), 0.88);
@@ -62,9 +67,12 @@
   }
 
   &[data-variant="subtle"] {
+    transition: all 300ms linear;
+
     &:hover {
       color: alpha(var(--button-color), 0.88);
       background-color: transparent;
+      border-color: alpha(var(--mb-color-border), 0.88);
     }
 
     &:disabled,
@@ -90,10 +98,12 @@
     justify-content: flex-start;
     color: var(--mb-color-text-dark);
     background-color: transparent;
+    transition: all 300ms linear;
 
     &:hover {
       color: var(--button-color);
       background-color: var(--button-color-hover);
+      border-color: alpha(var(--mb-color-border), 0.88);
 
       [data-position] {
         color: var(--button-color);
