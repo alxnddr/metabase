@@ -9,6 +9,7 @@ const ContentWrapper = styled.div`
   display: flex;
   align-items: stretch;
   min-height: 648px;
+  overflow: hidden; /* Prevent any content from overflowing horizontally */
 `;
 
 const SettingsAsideBlock = styled.div`
@@ -22,8 +23,8 @@ const SettingsAsideBlock = styled.div`
 `;
 
 const PreviewAreaBlock = styled.div`
+  flex: 1;
   width: 100%;
-  min-width: 50rem;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -32,6 +33,7 @@ const PreviewAreaBlock = styled.div`
   gap: 1rem;
   padding: 1rem 1.5rem 2rem 1rem;
   background-color: var(--mb-color-bg-light);
+  overflow-x: auto; /* Add horizontal scrolling to the preview area only when needed */
 `;
 
 export const SettingsTabLayout = ({
