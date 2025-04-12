@@ -1,6 +1,7 @@
 import {
   type PayloadAction,
-  createAction,
+  createAction as rtkCreateAction,
+  createReducer,
   createSlice,
 } from "@reduxjs/toolkit";
 import { LOCATION_CHANGE, push } from "react-router-redux";
@@ -10,7 +11,7 @@ import {
   openInBlankWindow,
   shouldOpenInBlankWindow,
 } from "metabase/lib/dom";
-import { combineReducers, handleActions } from "metabase/lib/redux";
+import { combineReducers } from "metabase/lib/redux";
 import type {
   Dispatch,
   TempStorage,
@@ -18,17 +19,14 @@ import type {
   TempStorageValue,
 } from "metabase-types/store";
 
-interface LocationChangeAction {
-  type: string; // "@@router/LOCATION_CHANGE"
-  payload: {
-    pathname: string;
-    search: string;
-    hash: string;
-    action: string;
-    key: string;
-    state?: any;
-    query?: any;
-  };
+interface LocationPayload {
+  pathname: string;
+  search: string;
+  hash: string;
+  action: string;
+  key: string;
+  state?: any;
+  query?: any;
 }
 
 export const SET_ERROR_PAGE = "metabase/app/SET_ERROR_PAGE";
@@ -58,13 +56,11 @@ export const openUrl =
     }
   };
 
-const errorPage = handleActions(
-  {
-    [SET_ERROR_PAGE]: (_, { payload }) => payload,
-    [LOCATION_CHANGE]: () => null,
-  },
-  null,
-);
+const errorPage = createReducer(null, (builder) => {
+  builder
+    .addCase(SET_ERROR_PAGE, (_, { payload }) => payload)
+    .addCase(LOCATION_CHANGE, () => null);
+});
 
 // regexr.com/7r89i
 // A word boundary is added to /model so it doesn't match /browse/models
@@ -80,42 +76,35 @@ export const OPEN_NAVBAR = "metabase/app/OPEN_NAVBAR";
 export const CLOSE_NAVBAR = "metabase/app/CLOSE_NAVBAR";
 export const TOGGLE_NAVBAR = "metabase/app/TOGGLE_NAVBAR";
 
-export const openNavbar = createAction(OPEN_NAVBAR);
-export const closeNavbar = createAction(CLOSE_NAVBAR);
-export const toggleNavbar = createAction(TOGGLE_NAVBAR);
+export const openNavbar = rtkCreateAction(OPEN_NAVBAR);
+export const closeNavbar = rtkCreateAction(CLOSE_NAVBAR);
+export const toggleNavbar = rtkCreateAction(TOGGLE_NAVBAR);
 
-const isNavbarOpen = handleActions(
-  {
-    [OPEN_NAVBAR]: () => true,
-    [TOGGLE_NAVBAR]: (isOpen) => !isOpen,
-    [CLOSE_NAVBAR]: () => false,
-    [LOCATION_CHANGE]: (
-      prevState: boolean,
-      { payload }: LocationChangeAction,
-    ) => {
+const isNavbarOpen = createReducer(true, (builder) => {
+  builder
+    .addCase(OPEN_NAVBAR, () => true)
+    .addCase(TOGGLE_NAVBAR, (isOpen) => !isOpen)
+    .addCase(CLOSE_NAVBAR, () => false)
+    .addCase(LOCATION_CHANGE, (prevState, { payload }: PayloadAction<any>) => {
       if (payload.state?.preserveNavbarState) {
         return prevState;
       }
-
+      
       return isNavbarOpenForPathname(payload.pathname, prevState);
-    },
-  },
-  true,
-);
+    });
+});
 
 export const OPEN_DIAGNOSTICS = "metabase/app/OPEN_DIAGNOSTIC_MODAL";
 export const CLOSE_DIAGNOSTICS = "metabase/app/CLOSE_DIAGNOSTIC_MODAL";
 
-export const openDiagnostics = createAction(OPEN_DIAGNOSTICS);
-export const closeDiagnostics = createAction(CLOSE_DIAGNOSTICS);
+export const openDiagnostics = rtkCreateAction(OPEN_DIAGNOSTICS);
+export const closeDiagnostics = rtkCreateAction(CLOSE_DIAGNOSTICS);
 
-const isErrorDiagnosticsOpen = handleActions(
-  {
-    [OPEN_DIAGNOSTICS]: () => true,
-    [CLOSE_DIAGNOSTICS]: () => false,
-  },
-  false,
-);
+const isErrorDiagnosticsOpen = createReducer(false, (builder) => {
+  builder
+    .addCase(OPEN_DIAGNOSTICS, () => true)
+    .addCase(CLOSE_DIAGNOSTICS, () => false);
+});
 
 const tempStorageSlice = createSlice({
   name: "tempStorage",

@@ -1,5 +1,5 @@
+import { createAction, createReducer } from "@reduxjs/toolkit";
 import { assoc, getIn, updateIn } from "icepick";
-import { createAction, handleActions } from "redux-actions";
 
 export const setRequestLoading = createAction(
   "metabase/requests/SET_REQUEST_LOADING",
@@ -37,55 +37,38 @@ const initialRequestState = {
   _isRequestState: true,
 };
 
-const requestStateReducer = handleActions(
-  {
-    [setRequestLoading]: {
-      next: (state, { payload: { queryKey, queryPromise } }) => ({
-        ...state,
-        queryKey,
-        queryPromise,
-        loading: true,
-        loaded: false,
-        error: null,
-      }),
-    },
-    [setRequestPromise]: {
-      next: (state, { payload: { queryKey, queryPromise } }) => ({
-        ...state,
-        queryKey,
-        queryPromise,
-      }),
-    },
-    [setRequestLoaded]: {
-      next: (state, { payload: { queryKey } }) => ({
-        ...state,
-        queryKey,
-        loading: false,
-        loaded: true,
-        error: null,
-        fetched: true,
-      }),
-    },
-    [setRequestError]: {
-      next: (state, { payload: { queryKey, error } }) => ({
-        ...state,
-        queryKey,
-        loading: false,
-        loaded: false,
-        error: error,
-      }),
-    },
-    [setRequestUnloaded]: {
-      next: (state) => ({
-        ...state,
-        loaded: false,
-        error: null,
-        queryPromise: null,
-      }),
-    },
-  },
-  initialRequestState,
-);
+const requestStateReducer = createReducer(initialRequestState, (builder) => {
+  builder
+    .addCase(setRequestLoading, (state, { payload: { queryKey, queryPromise } }) => {
+      state.queryKey = queryKey;
+      state.queryPromise = queryPromise;
+      state.loading = true;
+      state.loaded = false;
+      state.error = null;
+    })
+    .addCase(setRequestPromise, (state, { payload: { queryKey, queryPromise } }) => {
+      state.queryKey = queryKey;
+      state.queryPromise = queryPromise;
+    })
+    .addCase(setRequestLoaded, (state, { payload: { queryKey } }) => {
+      state.queryKey = queryKey;
+      state.loading = false;
+      state.loaded = true;
+      state.error = null;
+      state.fetched = true;
+    })
+    .addCase(setRequestError, (state, { payload: { queryKey, error } }) => {
+      state.queryKey = queryKey;
+      state.loading = false;
+      state.loaded = false;
+      state.error = error;
+    })
+    .addCase(setRequestUnloaded, (state) => {
+      state.loaded = false;
+      state.error = null;
+      state.queryPromise = null;
+    });
+});
 
 function requestStateReducerRecursive(state, action) {
   if (!state || state._isRequestState) {
