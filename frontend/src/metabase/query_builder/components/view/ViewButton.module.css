@@ -6,9 +6,7 @@
   );
   color: var(--view-button-color);
   border: none;
-  transition:
-    background 300ms linear,
-    border 300ms linear;
+  transition: background-color 200ms linear, color 200ms linear, border-color 200ms linear;
 
   &:hover {
     background-color: color-mix(
