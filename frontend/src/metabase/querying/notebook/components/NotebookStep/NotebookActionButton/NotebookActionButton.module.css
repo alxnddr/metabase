@@ -1,6 +1,6 @@
 .ColorButton {
   border: none;
-  transition: background 300ms;
+  transition: background-color 200ms linear, color 200ms linear, border-color 200ms linear;
   color: var(--notebook-action-button-color);
   background-color: color-mix(
     in srgb,
