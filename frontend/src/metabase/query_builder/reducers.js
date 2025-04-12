@@ -318,6 +318,8 @@ export const zoomedRowObjectId = handleActions(
     },
     [RESET_ROW_ZOOM]: { next: () => null },
     [RESET_QB]: { next: () => null },
+    // Reset zoomed row when query results change, which happens when filters are changed
+    [QUERY_COMPLETED]: { next: () => null },
   },
   null,
 );

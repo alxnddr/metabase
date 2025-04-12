@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import Question from "metabase-lib/v1/Question";
 
@@ -20,6 +20,11 @@ export function ObjectDetailWrapper({
   ...rest
 }: ObjectDetailProps) {
   const [currentObjectIndex, setCurrentObjectIndex] = useState(0);
+  
+  // Reset currentObjectIndex when data changes (e.g., when filter is updated)
+  useEffect(() => {
+    setCurrentObjectIndex(0);
+  }, [data?.rows?.length]);
 
   // only show modal if this object detail was triggered via an object detail zoom action
   const shouldShowModal = isObjectDetail;
