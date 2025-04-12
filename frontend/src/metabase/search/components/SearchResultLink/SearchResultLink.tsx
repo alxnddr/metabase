@@ -35,6 +35,7 @@ export const SearchResultLink = ({
         data-testid="result-link-wrapper"
         gap="xs"
         wrap="nowrap"
+        miw={0}
       >
         {leftIcon}
         <ResultLink
@@ -44,6 +45,7 @@ export const SearchResultLink = ({
           size="sm"
           truncate
           ref={truncatedRef}
+          style={{ minWidth: 0 }}
         >
           {children}
         </ResultLink>

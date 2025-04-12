@@ -10,6 +10,8 @@ type ResultLinkProps = AnchorProps | TextProps;
 
 export const ResultLink = styled.a<ResultLinkProps>`
   line-height: unset;
+  min-width: 0;
+  flex-shrink: 1;
   ${({ href }) => {
     return (
       href &&
@@ -28,4 +30,6 @@ export const ResultLink = styled.a<ResultLinkProps>`
 
 export const ResultLinkWrapper = styled(Group)`
   overflow: hidden;
+  min-width: 0; /* Ensures flex items can shrink below content size in Safari */
+  flex-shrink: 1;
 `;
