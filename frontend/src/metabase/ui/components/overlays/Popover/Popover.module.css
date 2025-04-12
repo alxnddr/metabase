@@ -1,5 +1,6 @@
 .dropdown {
   padding: 0;
+  padding-bottom: 0.75rem; /* Add bottom padding to ensure items at the end have proper spacing */
   overflow: auto;
   background: var(--mb-color-background);
   border-color: var(--mb-color-border);
