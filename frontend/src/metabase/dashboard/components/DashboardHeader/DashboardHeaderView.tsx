@@ -5,6 +5,7 @@ import { t } from "ttag";
 
 /* eslint-disable-next-line no-restricted-imports -- deprecated sdk import */
 import { useInteractiveDashboardContext } from "embedding-sdk/components/public/InteractiveDashboard/context";
+import { DASHBOARD_NAME_MAX_LENGTH } from "metabase/dashboard/constants";
 import { isInstanceAnalyticsCollection } from "metabase/collections/utils";
 import EditBar from "metabase/components/EditBar";
 import LastEditInfoLabel from "metabase/components/LastEditInfoLabel";
@@ -205,6 +206,7 @@ export function DashboardHeaderView({
                     initialValue={dashboard.name}
                     placeholder={t`Add title`}
                     isDisabled={!dashboard.can_write}
+                    maxLength={DASHBOARD_NAME_MAX_LENGTH}
                     data-testid="dashboard-name-heading"
                     onChange={handleUpdateCaption}
                   />
