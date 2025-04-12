@@ -29,6 +29,10 @@ export const ZOOM_IN_ROW = "metabase/qb/ZOOM_IN_ROW";
 export const zoomInRow =
   ({ objectId }: { objectId: ObjectId }) =>
   (dispatch: Dispatch, getState: GetState) => {
+    // First reset the zoom state to ensure we start fresh
+    dispatch(resetRowZoom());
+    
+    // Then set the new object ID for zooming
     dispatch({ type: ZOOM_IN_ROW, payload: { objectId } });
 
     // don't show object id in url if it is a row index
